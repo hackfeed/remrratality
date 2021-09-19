@@ -61,7 +61,7 @@ label {
   padding: 0.75rem 1.5rem;
   font: inherit;
   background-color: transparent;
-  color: #389948;
+  color: $color-primary;
   border: none;
   cursor: pointer;
   border-radius: 30px;
@@ -69,8 +69,8 @@ label {
   display: inline-block;
   &:hover,
   &:active {
-    background-color: #70b87c;
-    color: white;
+    background-color: $color-primary-light;
+    color: $color-neutral-primary;
   }
 }
 </style>

@@ -65,15 +65,15 @@ dialog {
   z-index: 100;
   border-radius: 12px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 2px 8px $color-border-primary;
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background-color: white;
+  background-color: $color-neutral-primary;
 }
 header {
-  background-color: #389948;
-  color: white;
+  background-color: $color-primary;
+  color: $color-text-secondary;
   width: 100%;
   padding: 1rem;
   h2 {
@@ -98,7 +98,7 @@ menu {
   left: 0;
   height: 100vh;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: $color-backdrop;
   z-index: 10;
 }
 

@@ -111,11 +111,11 @@ textarea {
   display: block;
   width: 100%;
   font: inherit;
-  border: 1px solid #ccc;
+  border: 1px solid $color-login-border;
   padding: 0.15rem;
-  :focus {
-    border-color: #389948;
-    background-color: #faf6ff;
+  &:focus {
+    border-color: $color-primary;
+    background-color: $color-login-background;
     outline: none;
   }
 }

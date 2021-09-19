@@ -39,13 +39,13 @@ export default class TheHeader extends Vue {
 header {
   width: 100%;
   height: 4rem;
-  background-color: #389948;
+  background-color: $color-primary;
   display: flex;
   justify-content: center;
   align-items: center;
   a {
     text-decoration: none;
-    color: #ffffff;
+    color: $color-text-secondary;
     display: inline-block;
     padding: 0.75rem 1.5rem;
     border: 1px solid transparent;
@@ -70,8 +70,8 @@ header {
 a {
   &:active,
   &:hover,
-  .router-link-active {
-    border: 1px solid #ffffff;
+  &.router-link-active {
+    border: 1px solid $color-text-secondary;
   }
 }
 
@@ -83,11 +83,11 @@ h1 {
     height: 3rem;
   }
   a {
-    color: white;
+    color: $color-text-secondary;
     margin: 0;
     &:hover,
     &:active,
-    .router-link-active {
+    &.router-link-active {
       border-color: transparent;
     }
   }

@@ -42,39 +42,39 @@ a {
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   font: inherit;
-  background-color: #389948;
-  border: 1px solid #389948;
-  color: white;
+  background-color: $color-primary;
+  border: 1px solid $color-primary;
+  color: $color-text-secondary;
   cursor: pointer;
   border-radius: 30px;
   margin-right: 0.5rem;
   display: inline-block;
   &:hover,
   &:active {
-    background-color: #24642f;
-    border-color: #24642f;
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
   }
 }
 
 .flat {
   background-color: transparent;
-  color: #389948;
+  color: $color-primary;
   border: none;
   &:hover,
   &:active {
-    background-color: #70b87c;
-    color: white;
+    background-color: $color-primary-light;
+    color: $color-text-secondary;
   }
 }
 
 .outline {
   background-color: transparent;
-  border-color: #24642f;
-  color: #24642f;
+  border-color: $color-primary-dark;
+  color: $color-primary-dark;
   &:hover,
   &:active {
-    background-color: #70b87c;
-    color: white;
+    background-color: $color-primary-light;
+    color: $color-text-secondary;
   }
 }
 </style>

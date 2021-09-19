@@ -50,9 +50,9 @@ label {
 }
 
 input[type="month"] {
-  border: 1px solid #389948;
+  border: 1px solid $color-primary;
   border-radius: 5px;
-  color: black;
+  color: $color-input-primary;
   text-align: center;
   font-family: "Roboto", sans-serif;
   cursor: pointer;

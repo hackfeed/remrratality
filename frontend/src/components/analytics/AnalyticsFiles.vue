@@ -62,21 +62,21 @@ img {
   align-items: center;
   margin: 0 0 0.5rem;
   padding: 0 0.2rem;
-  border: 1px rgba(0, 0, 0, 0.26) solid;
+  border: 1px $color-border-primary solid;
   border-radius: 0.5rem;
   &:hover {
     cursor: pointer;
     border-color: none;
-    background: rgb(231, 231, 231);
+    background: $color-neutral-hover;
   }
 }
 
 .files-selection__filename {
-  color: #389948;
+  color: $color-primary;
   font-weight: bold;
 }
 
 .files-selection__uploadtime {
-  color: rgb(185, 184, 184);
+  color: $color-neutral-secondary;
 }
 </style>
