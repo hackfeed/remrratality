@@ -2,8 +2,8 @@
   <header>
     <nav>
       <h1>
-        <img src="@/assets/logo.png" alt="mrratality" />
-        <router-link to="/">mrratality</router-link>
+        <img src="@/assets/images/logo.png" alt="remrratality" />
+        <router-link to="/">remrratality</router-link>
       </h1>
       <ul>
         <li v-if="isLoggedIn">
@@ -68,8 +68,8 @@ header {
 }
 
 a {
-  :active,
-  :hover,
+  &:active,
+  &:hover,
   .router-link-active {
     border: 1px solid #ffffff;
   }
@@ -85,8 +85,8 @@ h1 {
   a {
     color: white;
     margin: 0;
-    :hover,
-    :active,
+    &:hover,
+    &:active,
     .router-link-active {
       border-color: transparent;
     }

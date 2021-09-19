@@ -1,8 +1,14 @@
 import { createStore } from "vuex";
 
-export default createStore({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {},
+import { RootState } from "@/interfaces/state";
+
+import analytics from "./modules/analytics";
+import auth from "./modules/auth";
+
+export default createStore<RootState>({
+  state: new RootState(),
+  modules: {
+    auth,
+    analytics,
+  },
 });

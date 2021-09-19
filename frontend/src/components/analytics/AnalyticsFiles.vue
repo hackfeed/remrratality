@@ -5,7 +5,7 @@
       <div @click="chooseFile(file)" class="files-selection" v-for="file in files" :key="file">
         <p class="files-selection__filename">{{ file.name }}</p>
         <p class="files-selection__uploadtime">Uploaded at {{ parseDate(file.uploadedAt) }}</p>
-        <img @click.stop="deleteFile(file)" src="@/assets/remove.png" alt="Remove file" />
+        <img @click.stop="deleteFile(file)" src="@/assets/images/remove.png" alt="Remove file" />
       </div>
     </ul>
     <base-button @click="uploadNew(true)">Upload new</base-button>
@@ -23,7 +23,7 @@ import { File } from "@/interfaces/file";
   emits: ["upload-new", "choose-file", "delete-file", "is-uploaded"],
 })
 export default class AnalyticsFiles extends Vue {
-  readonly iles!: File[];
+  readonly files!: File[];
 
   parseDate(date: string): string {
     const unixTime = Date.parse(date);
@@ -64,7 +64,7 @@ img {
   padding: 0 0.2rem;
   border: 1px rgba(0, 0, 0, 0.26) solid;
   border-radius: 0.5rem;
-  :hover {
+  &:hover {
     cursor: pointer;
     border-color: none;
     background: rgb(231, 231, 231);

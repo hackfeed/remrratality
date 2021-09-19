@@ -23,7 +23,7 @@ import { Options, Vue } from "vue-class-component";
   emits: ["upload-data", "upload-new"],
 })
 export default class AnalyticsForm extends Vue {
-  file!: File;
+  file: File | string = "";
   readonly filesNotEmpty!: string;
 
   handleFileUpload(): void {
@@ -67,8 +67,8 @@ label {
   border-radius: 30px;
   margin-right: 0.5rem;
   display: inline-block;
-  :hover,
-  :active {
+  &:hover,
+  &:active {
     background-color: #70b87c;
     color: white;
   }

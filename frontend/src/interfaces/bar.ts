@@ -32,7 +32,7 @@ interface Axis {
   ticks?: {
     beginAtZero: boolean;
   };
-  gridlines: {
+  gridLines: {
     display: boolean;
   };
 }

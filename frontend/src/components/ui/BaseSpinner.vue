@@ -29,7 +29,7 @@
   div {
     animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     transform-origin: 40px 40px;
-    :after {
+    &:after {
       content: " ";
       display: block;
       position: absolute;
@@ -39,58 +39,58 @@
       background: #389948;
       margin: -4px 0 0 -4px;
     }
-    :nth-child(1) {
+    &:nth-child(1) {
       animation-delay: -0.036s;
-      :after {
+      &:after {
         top: 63px;
         left: 63px;
       }
     }
-    :nth-child(2) {
+    &:nth-child(2) {
       animation-delay: -0.072s;
-      :after {
+      &:after {
         top: 68px;
         left: 56px;
       }
     }
-    :nth-child(3) {
+    &:nth-child(3) {
       animation-delay: -0.108s;
-      :after {
+      &:after {
         top: 71px;
         left: 48px;
       }
     }
-    :nth-child(4) {
+    &:nth-child(4) {
       animation-delay: -0.144s;
-      :after {
+      &:after {
         top: 72px;
         left: 40px;
       }
     }
-    :nth-child(5) {
+    &:nth-child(5) {
       animation-delay: -0.18s;
-      :after {
+      &:after {
         top: 71px;
         left: 32px;
       }
     }
-    :nth-child(6) {
+    &:nth-child(6) {
       animation-delay: -0.216s;
-      :after {
+      &:after {
         top: 68px;
         left: 24px;
       }
     }
-    :nth-child(7) {
+    &:nth-child(7) {
       animation-delay: -0.252s;
-      :after {
+      &:after {
         top: 63px;
         left: 17px;
       }
     }
-    :nth-child(8) {
+    &:nth-child(8) {
       animation-delay: -0.288s;
-      :after {
+      &:after {
         top: 56px;
         left: 12px;
       }

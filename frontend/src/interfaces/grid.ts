@@ -1,5 +1,5 @@
 export interface Grid {
-  title: string;
+  title: string | null;
   cols: any;
   rows: any;
 }

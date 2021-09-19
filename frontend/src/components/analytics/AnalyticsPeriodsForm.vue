@@ -56,7 +56,7 @@ input[type="month"] {
   text-align: center;
   font-family: "Roboto", sans-serif;
   cursor: pointer;
-  :focus {
+  &:focus {
     outline: none;
   }
 }

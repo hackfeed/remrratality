@@ -2,14 +2,14 @@
   <footer>
     <nav>
       <h1>
-        <img src="@/assets/logo.png" alt="mrratality" />
+        <img src="@/assets/images/logo.png" alt="remrratality" />
         <router-link to="/">remrratality</router-link>
       </h1>
       <ul>
         <li>© 2021 hackfeed</li>
         <li><a href="mailto:hackfeed@yandex.ru">Contact me</a></li>
         <li>
-          <a href="https://github.com/hackfeed/mrratality">Project Page</a>
+          <a href="https://github.com/hackfeed/remrratality">Project Page</a>
         </li>
       </ul>
     </nav>
@@ -54,7 +54,7 @@ li {
   a {
     color: black;
     text-decoration: none;
-    :hover {
+    &:hover {
       text-decoration: underline;
     }
   }
@@ -74,9 +74,9 @@ h1 {
     margin: 0;
     padding: 0.75rem 1.5rem;
     display: inline-block;
-    :hover,
-    :active,
-    .router-link-active {
+    &:hover,
+    &:active,
+    &.router-link-active {
       border-color: transparent;
     }
   }
