@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/hackfeed/remrratality/backend/internal/db/models"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -24,15 +22,30 @@ type Options struct {
 	DB       string
 }
 
+type Invoice struct {
+	UserID      string
+	FileID      string
+	CustomerID  uint32
+	PeriodStart time.Time
+	PaidPlan    string
+	PaidAmount  float32
+	PeriodEnd   time.Time
+}
+
 var (
 	postgresClient *PostgresClient
-	lock           = &sync.Mutex{}
+	AllFields      = []string{
+		"user_id",
+		"file_id",
+		"customer_id",
+		"period_start",
+		"paid_plan",
+		"paid_amount",
+		"period_end",
+	}
 )
 
 func NewPostgresClient(ctx context.Context, options *Options) (*PostgresClient, error) {
-	lock.Lock()
-	defer lock.Unlock()
-
 	if postgresClient == nil {
 		client, err := getPostgresClient(ctx, options)
 		if err != nil {
@@ -58,7 +71,7 @@ func getPostgresClient(ctx context.Context, options *Options) (*pgxpool.Pool, er
 	return client, nil
 }
 
-func (pc *PostgresClient) Insert(ctx context.Context, table string, fields []string, invoices []models.Invoice) error {
+func (pc *PostgresClient) Create(ctx context.Context, table string, fields []string, invoices []Invoice) error {
 	tx, err := pc.client.Begin(ctx)
 	if err != nil {
 		return err
@@ -85,7 +98,7 @@ func (pc *PostgresClient) Insert(ctx context.Context, table string, fields []str
 	return tx.Commit(ctx)
 }
 
-func (pc *PostgresClient) InsertDynamic(ctx context.Context, table string, data []interface{}) error {
+func (pc *PostgresClient) CreateDynamic(ctx context.Context, table string, data []interface{}) error {
 	vals := ""
 	for _, val := range data {
 		vals += fmt.Sprintf("%v,", val)
@@ -97,12 +110,12 @@ func (pc *PostgresClient) InsertDynamic(ctx context.Context, table string, data 
 	return err
 }
 
-func (pc *PostgresClient) SelectByPeriod(
+func (pc *PostgresClient) ReadByPeriod(
 	ctx context.Context,
 	table string,
 	fields []string,
 	userID, fileID string,
-	periodStart, periodEnd time.Time) ([]models.Invoice, error) {
+	periodStart, periodEnd time.Time) ([]Invoice, error) {
 
 	cols := ""
 	for _, field := range fields {
@@ -128,9 +141,9 @@ func (pc *PostgresClient) SelectByPeriod(
 		return nil, err
 	}
 
-	data := []models.Invoice{}
+	data := []Invoice{}
 	for rows.Next() {
-		invoice := models.Invoice{}
+		invoice := Invoice{}
 		if err := rows.Scan(
 			&invoice.UserID,
 			&invoice.FileID,
@@ -148,7 +161,7 @@ func (pc *PostgresClient) SelectByPeriod(
 	return data, nil
 }
 
-func (pc *PostgresClient) SelectDynamic(ctx context.Context, table string) ([][]interface{}, error) {
+func (pc *PostgresClient) ReadDynamic(ctx context.Context, table string) ([][]interface{}, error) {
 	rows, err := pc.client.Query(ctx, fmt.Sprintf("SELECT * FROM %s", table))
 	if err != nil {
 		return nil, err
