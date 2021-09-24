@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 var AllFields = []string{
 	"user_id",
 	"file_id",
@@ -14,8 +16,8 @@ type Invoice struct {
 	UserID      string
 	FileID      string
 	CustomerID  uint32
-	PeriodStart string
+	PeriodStart time.Time
 	PaidPlan    string
 	PaidAmount  float32
-	PeriodEnd   string
+	PeriodEnd   time.Time
 }

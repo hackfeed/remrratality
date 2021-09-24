@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -66,16 +67,14 @@ func (pc *PostgresClient) Insert(ctx context.Context, table string, fields []str
 
 	data := make([][]interface{}, len(invoices))
 	for i := range data {
-		periodStart, _ := time.Parse("2006-01-02", invoices[i].PeriodStart)
-		periodEnd, _ := time.Parse("2006-01-02", invoices[i].PeriodEnd)
 		data[i] = []interface{}{
 			invoices[i].UserID,
 			invoices[i].FileID,
 			invoices[i].CustomerID,
-			periodStart,
+			invoices[i].PeriodStart,
 			invoices[i].PaidPlan,
 			invoices[i].PaidAmount,
-			periodEnd,
+			invoices[i].PeriodEnd,
 		}
 	}
 	_, err = pc.client.CopyFrom(ctx, pgx.Identifier{table}, fields, pgx.CopyFromRows(data))
@@ -84,4 +83,113 @@ func (pc *PostgresClient) Insert(ctx context.Context, table string, fields []str
 	}
 
 	return tx.Commit(ctx)
+}
+
+func (pc *PostgresClient) InsertDynamic(ctx context.Context, table string, data []interface{}) error {
+	vals := ""
+	for _, val := range data {
+		vals += fmt.Sprintf("%v,", val)
+	}
+	vals = strings.TrimSuffix(vals, ",")
+
+	_, err := pc.client.Query(ctx, fmt.Sprintf("INSERT INTO %s VALUES (%v)", table, vals))
+
+	return err
+}
+
+func (pc *PostgresClient) SelectByPeriod(
+	ctx context.Context,
+	table string,
+	fields []string,
+	userID, fileID string,
+	periodStart, periodEnd time.Time) ([]models.Invoice, error) {
+
+	cols := ""
+	for _, field := range fields {
+		cols += fmt.Sprintf("%v,", field)
+	}
+	cols = strings.TrimSuffix(cols, ",")
+
+	query := fmt.Sprintf(
+		"SELECT %s FROM %s WHERE period_start <= '%s' AND period_end >= '%s' AND user_id = '%s' and file_id = '%s'",
+		cols,
+		table,
+		periodStart.Format("2006-01-02"),
+		periodEnd.Format("2006-01-02"),
+		userID,
+		fileID,
+	)
+	fmt.Println(query)
+	rows, err := pc.client.Query(
+		ctx,
+		query,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	data := []models.Invoice{}
+	for rows.Next() {
+		invoice := models.Invoice{}
+		if err := rows.Scan(
+			&invoice.UserID,
+			&invoice.FileID,
+			&invoice.CustomerID,
+			&invoice.PeriodStart,
+			&invoice.PaidPlan,
+			&invoice.PaidAmount,
+			&invoice.PeriodEnd,
+		); err != nil {
+			return nil, err
+		}
+		data = append(data, invoice)
+	}
+
+	return data, nil
+}
+
+func (pc *PostgresClient) SelectDynamic(ctx context.Context, table string) ([][]interface{}, error) {
+	rows, err := pc.client.Query(ctx, fmt.Sprintf("SELECT * FROM %s", table))
+	if err != nil {
+		return nil, err
+	}
+
+	res := [][]interface{}{}
+
+	cols := rows.FieldDescriptions()
+	if err != nil {
+		return nil, err
+	}
+	count := len(cols)
+	vals := make([]interface{}, count)
+	valsPtrs := make([]interface{}, count)
+
+	for i := range cols {
+		valsPtrs[i] = &vals[i]
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(valsPtrs...); err != nil {
+			return nil, err
+		}
+		row := []interface{}{}
+		row = append(row, vals...)
+		res = append(res, row)
+	}
+
+	return res, nil
+}
+
+func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID string) error {
+	_, err := pc.client.Query(
+		ctx,
+		fmt.Sprintf(
+			"DELETE FROM %s WHERE user_id = '%s' AND file_id = '%s'",
+			table,
+			userID,
+			fileID,
+		),
+	)
+
+	return err
 }
