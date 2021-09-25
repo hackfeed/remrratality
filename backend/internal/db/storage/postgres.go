@@ -98,14 +98,19 @@ func (pc *PostgresClient) Create(ctx context.Context, table string, fields []str
 	return tx.Commit(ctx)
 }
 
-func (pc *PostgresClient) CreateDynamic(ctx context.Context, table string, data []interface{}) error {
-	vals := ""
-	for _, val := range data {
-		vals += fmt.Sprintf("%v,", val)
-	}
-	vals = strings.TrimSuffix(vals, ",")
+func (pc *PostgresClient) CreateDynamic(ctx context.Context, table string, data [][]interface{}) error {
+	query := fmt.Sprintf("INSERT INTO %s VALUES", table)
 
-	_, err := pc.client.Query(ctx, fmt.Sprintf("INSERT INTO %s VALUES (%v)", table, vals))
+	for _, record := range data {
+		vals := ""
+		for _, val := range record {
+			vals += fmt.Sprintf("%v,", val)
+		}
+		vals = strings.TrimSuffix(vals, ",")
+		query += fmt.Sprintf(" (%v),", vals)
+	}
+
+	_, err := pc.client.Query(ctx, query)
 
 	return err
 }

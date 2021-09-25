@@ -10,7 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocarina/gocsv"
 	"github.com/google/uuid"
+	"github.com/hackfeed/remrratality/backend/internal/domain"
 	"github.com/hackfeed/remrratality/backend/internal/server/models"
+	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
 )
 
@@ -66,6 +68,13 @@ func DeleteFile(c *gin.Context) {
 		})
 		return
 	}
+	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to get storage_repo",
+		})
+		return
+	}
 
 	var req models.File
 
@@ -77,7 +86,7 @@ func DeleteFile(c *gin.Context) {
 		return
 	}
 
-	err = deleteFile(userRepo, email, userID, req.Name)
+	err = deleteFile(userRepo, storageRepo, email, userID, req.Name)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "Failed to delete file",
@@ -109,6 +118,13 @@ func SaveFile(c *gin.Context) {
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to get user_repo",
+		})
+		return
+	}
+	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to get storage_repo",
 		})
 		return
 	}
@@ -172,7 +188,7 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
-	err = uploadFile()
+	err = uploadFile(storageRepo, userID, filename, invoices)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "Failed to upload data to database",
@@ -192,7 +208,7 @@ func loadFiles(userRepo userrepo.UserRepository, email string) ([]map[string]int
 	return user.Files, err
 }
 
-func deleteFile(userRepo userrepo.UserRepository, email, userID, filename string) error {
+func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.StorageRepository, email, userID, filename string) error {
 	err := os.Remove(fmt.Sprintf("static/%v/%v", userID, filename))
 	if err != nil {
 		return err
@@ -211,8 +227,12 @@ func deleteFile(userRepo userrepo.UserRepository, email, userID, filename string
 	}
 
 	user.Files = newFiles
+	err = userRepo.UpdateUser(userID, user)
+	if err != nil {
+		return err
+	}
 
-	return userRepo.UpdateUser(userID, user)
+	return storageRepo.DeleteInvoices(userID, filename)
 }
 
 func updateFiles(userRepo userrepo.UserRepository, email, userID, filename string) error {
@@ -227,6 +247,23 @@ func updateFiles(userRepo userrepo.UserRepository, email, userID, filename strin
 	return userRepo.UpdateUser(userID, user)
 }
 
-func uploadFile() error {
-	return nil
+func uploadFile(storageRepo storagerepo.StorageRepository, userID, fileID string, invoices []*models.Invoice) error {
+	mappedInvoices := make([]domain.Invoice, 0)
+
+	for _, invoice := range invoices {
+		mappedInvoice := domain.Invoice{
+			UserID:      userID,
+			FileID:      fileID,
+			CustomerID:  invoice.CustomerID,
+			PeriodStart: invoice.PeriodStart,
+			PaidPlan:    invoice.PaidPlan,
+			PaidAmount:  invoice.PaidAmount,
+			PeriodEnd:   invoice.PeriodEnd,
+		}
+		mappedInvoices = append(mappedInvoices, mappedInvoice)
+	}
+
+	_, err := storageRepo.AddInvoices(mappedInvoices)
+
+	return err
 }

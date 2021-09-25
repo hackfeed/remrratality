@@ -10,11 +10,13 @@ import (
 	"github.com/hackfeed/remrratality/backend/internal/db/user"
 	"github.com/hackfeed/remrratality/backend/internal/server/controllers"
 	"github.com/hackfeed/remrratality/backend/internal/server/middlewares"
+	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
 )
 
 var (
-	userRepo userrepo.UserRepository
+	userRepo    userrepo.UserRepository
+	storageRepo storagerepo.StorageRepository
 )
 
 func init() {
@@ -29,7 +31,7 @@ func init() {
 	}
 	userRepo = userrepo.NewMongoRepo(*userClient)
 
-	_, err = storage.NewPostgresClient(ctx, &storage.Options{
+	storageClient, err := storage.NewPostgresClient(ctx, &storage.Options{
 		Host:     "localhost",
 		Port:     5432,
 		User:     "postgres",
@@ -39,6 +41,7 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	storageRepo = storagerepo.NewPostgresRepo(*storageClient)
 }
 
 func SetupServer() *gin.Engine {
@@ -50,6 +53,7 @@ func SetupServer() *gin.Engine {
 	r.Use(cors.New(config))
 
 	r.Use(middlewares.UserRepo(userRepo))
+	r.Use(middlewares.StorageRepo(storageRepo))
 
 	r.POST("/signup", controllers.SignUp)
 	r.POST("/login", controllers.Login)
