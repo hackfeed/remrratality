@@ -1,4 +1,4 @@
 export interface File {
   name: string;
-  uploadedAt: string;
+  uploaded_at: string;
 }

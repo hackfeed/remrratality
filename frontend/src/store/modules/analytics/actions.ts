@@ -1,5 +1,6 @@
 import { ActionContext } from "vuex";
 
+import { File } from "@/interfaces/file";
 import { AnalyticsState, RootState } from "@/interfaces/state";
 
 export default {
@@ -120,7 +121,7 @@ export default {
     }
 
     const files = context.rootGetters["analytics/files"].filter(
-      (file: any) => file.name != reqData.name
+      (file: File) => file.name != (reqData as Record<string, unknown>).name
     );
 
     context.commit("setFiles", files);

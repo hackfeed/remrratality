@@ -10,7 +10,7 @@ export default {
   setPeriodEnd(state: AnalyticsState, data: string): void {
     state.periodEnd = data;
   },
-  setFile(state: AnalyticsState, data: string): void {
+  setFile(state: AnalyticsState, data: File): void {
     state.file = data;
   },
   setData(state: AnalyticsState, data: BarData): void {

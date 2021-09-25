@@ -18,13 +18,13 @@ import { Options, Vue } from "vue-class-component";
 
 @Options({
   props: {
-    filesNotEmpty: String,
+    filesNotEmpty: Boolean,
   },
   emits: ["upload-data", "upload-new"],
 })
 export default class AnalyticsForm extends Vue {
   file: File | string = "";
-  readonly filesNotEmpty!: string;
+  readonly filesNotEmpty!: boolean;
 
   handleFileUpload(): void {
     const files = this.$refs.file as HTMLInputElement;

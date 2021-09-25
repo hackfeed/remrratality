@@ -4,7 +4,7 @@
     <ul>
       <div @click="chooseFile(file)" class="files-selection" v-for="file in files" :key="file">
         <p class="files-selection__filename">{{ file.name }}</p>
-        <p class="files-selection__uploadtime">Uploaded at {{ parseDate(file.uploadedAt) }}</p>
+        <p class="files-selection__uploadtime">Uploaded at {{ parseDate(file.uploaded_at) }}</p>
         <img @click.stop="deleteFile(file)" src="@/assets/images/remove.png" alt="Remove file" />
       </div>
     </ul>

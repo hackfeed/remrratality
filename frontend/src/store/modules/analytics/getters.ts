@@ -13,7 +13,7 @@ export default {
   files(state: AnalyticsState): File[] | null {
     return state.files;
   },
-  file(state: AnalyticsState): string | null {
+  file(state: AnalyticsState): File | null {
     return state.file;
   },
   data(state: AnalyticsState): BarData {

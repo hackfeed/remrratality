@@ -8,7 +8,7 @@ export interface AnalyticsState {
   periodStart: string;
   periodEnd: string;
   files: File[] | null;
-  file: string | null;
+  file: File | null;
   grid: Grid;
   data: BarData;
   dataOptions: BarDataOptions;
