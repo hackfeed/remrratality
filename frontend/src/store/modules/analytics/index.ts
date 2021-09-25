@@ -1,4 +1,4 @@
-import { BarData, BarDataOptions } from "@/interfaces/bar";
+import { BarData, BarOptions } from "@/interfaces/bar";
 import { Grid } from "@/interfaces/grid";
 import { AnalyticsState } from "@/interfaces/state";
 import actions from "@/store/modules/analytics/actions";
@@ -52,40 +52,38 @@ const state = {
   } as BarData,
   dataOptions: {
     responsive: true,
-    legend: {
-      display: false,
-    },
-    title: {
-      display: true,
-      text: "Monthly Reccuring Revenue (Chart)",
-      fontSize: 24,
-      fontColor: "black",
-    },
-    tooltips: {
-      backgroundColor: "#17BF62",
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: "Monthly Reccuring Revenue (Chart)",
+        fontSize: 24,
+        fontColor: "black",
+      },
+      tooltips: {
+        backgroundColor: "#17BF62",
+      },
     },
     scales: {
-      xAxes: [
-        {
-          stacked: true,
-          gridLines: {
-            display: false,
-          },
+      x: {
+        stacked: true,
+        grid: {
+          display: false,
         },
-      ],
-      yAxes: [
-        {
-          stacked: true,
-          ticks: {
-            beginAtZero: true,
-          },
-          gridLines: {
-            display: false,
-          },
+      },
+      y: {
+        stacked: true,
+        ticks: {
+          beginAtZero: true,
         },
-      ],
+        grid: {
+          display: false,
+        },
+      },
     },
-  } as BarDataOptions,
+  } as BarOptions,
 } as AnalyticsState;
 
 export default {

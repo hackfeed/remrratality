@@ -1,4 +1,4 @@
-import { BarData, BarDataOptions } from "./bar";
+import { BarData, BarOptions } from "./bar";
 import { File } from "./file";
 import { Grid } from "./grid";
 
@@ -11,7 +11,7 @@ export interface AnalyticsState {
   file: File | null;
   grid: Grid;
   data: BarData;
-  dataOptions: BarDataOptions;
+  dataOptions: BarOptions;
 }
 
 export interface AuthState {

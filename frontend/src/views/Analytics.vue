@@ -34,7 +34,10 @@
     </base-card>
     <div v-if="isLoaded" class="centered">
       <base-card>
-        <analytics-chart :data="analyticsData" :options="analyticsOptions"></analytics-chart>
+        <analytics-chart
+          :bar-data="analyticsData"
+          :bar-options="analyticsOptions"
+        ></analytics-chart>
       </base-card>
       <base-card>
         <analytics-grid :grid="analyticsGrid"></analytics-grid>
@@ -52,7 +55,7 @@ import AnalyticsPeriodsForm from "@/components/analytics/AnalyticsPeriodsForm.vu
 import AnalyticsChart from "@/components/analytics/AnalyticsChart.vue";
 import AnalyticsGrid from "@/components/analytics/AnalyticsGrid.vue";
 
-import { BarData, BarDataOptions } from "@/interfaces/bar";
+import { BarData, BarOptions } from "@/interfaces/bar";
 
 @Options({
   components: {
@@ -89,7 +92,7 @@ export default class Analytics extends Vue {
     return this.$store.getters["analytics/grid"];
   }
 
-  get analyticsOptions(): BarDataOptions {
+  get analyticsOptions(): BarOptions {
     return this.$store.getters["analytics/dataOptions"];
   }
 

@@ -24,7 +24,6 @@ export default class AnalyticsGrid extends Vue {
       new Grid({
         columns: this.grid.cols,
         data: this.grid.rows,
-        search: true,
       }).render(wrapper);
     }
   }

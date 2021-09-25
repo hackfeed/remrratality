@@ -1,4 +1,4 @@
-import { BarData, BarDataOptions } from "@/interfaces/bar";
+import { BarData, BarOptions } from "@/interfaces/bar";
 import { File } from "@/interfaces/file";
 import { Grid } from "@/interfaces/grid";
 import { AnalyticsState } from "@/interfaces/state";
@@ -22,7 +22,7 @@ export default {
   grid(state: AnalyticsState): Grid {
     return state.grid;
   },
-  dataOptions(state: AnalyticsState): BarDataOptions {
+  dataOptions(state: AnalyticsState): BarOptions {
     return state.dataOptions;
   },
 };

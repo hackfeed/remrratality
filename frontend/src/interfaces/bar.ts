@@ -7,23 +7,25 @@ export interface BarData {
   }[];
 }
 
-export interface BarDataOptions {
+export interface BarOptions {
   responsive: boolean;
-  legend: {
-    display: boolean;
-  };
-  title: {
-    display: boolean;
-    text: string;
-    fontSize: number;
-    fontColor: string;
-  };
-  tooltips: {
-    backgroundColor: string;
+  plugins: {
+    legend: {
+      display: boolean;
+    };
+    title: {
+      display: boolean;
+      text: string;
+      fontSize: number;
+      fontColor: string;
+    };
+    tooltips: {
+      backgroundColor: string;
+    };
   };
   scales: {
-    xAxes: Axis[];
-    yAxes: Axis[];
+    x: Axis;
+    y: Axis;
   };
 }
 
@@ -32,7 +34,7 @@ interface Axis {
   ticks?: {
     beginAtZero: boolean;
   };
-  gridLines: {
+  grid: {
     display: boolean;
   };
 }

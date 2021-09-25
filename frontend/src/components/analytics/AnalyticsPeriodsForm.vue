@@ -21,7 +21,7 @@
 import { Options, Vue } from "vue-class-component";
 
 @Options({
-  emits: ["upload-data", "upload-new"],
+  emits: ["load-data", "upload-new"],
 })
 export default class AnalyticsPeriodsForm extends Vue {
   periodStart = "";
