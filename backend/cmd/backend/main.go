@@ -5,9 +5,5 @@ import (
 )
 
 func main() {
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	panic("Failed to load .env file")
-	// }
-	server.SetupServer().Run(":8081")
+	server.SetupServer().Run()
 }

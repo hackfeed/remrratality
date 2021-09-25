@@ -16,7 +16,7 @@ type PostgresClient struct {
 
 type Options struct {
 	Host     string
-	Port     int
+	Port     string
 	User     string
 	Password string
 	DB       string
@@ -34,6 +34,7 @@ type Invoice struct {
 
 var (
 	postgresClient *PostgresClient
+	layout         = "2006-01-02"
 	AllFields      = []string{
 		"user_id",
 		"file_id",
@@ -61,7 +62,7 @@ func NewPostgresClient(ctx context.Context, options *Options) (*PostgresClient, 
 }
 
 func getPostgresClient(ctx context.Context, options *Options) (*pgxpool.Pool, error) {
-	dbURL := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s",
+	dbURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s",
 		options.Host, options.Port, options.User, options.DB, options.Password)
 	client, err := pgxpool.Connect(ctx, dbURL)
 	if err != nil {
@@ -98,23 +99,6 @@ func (pc *PostgresClient) Create(ctx context.Context, table string, fields []str
 	return tx.Commit(ctx)
 }
 
-func (pc *PostgresClient) CreateDynamic(ctx context.Context, table string, data [][]interface{}) error {
-	query := fmt.Sprintf("INSERT INTO %s VALUES", table)
-
-	for _, record := range data {
-		vals := ""
-		for _, val := range record {
-			vals += fmt.Sprintf("%v,", val)
-		}
-		vals = strings.TrimSuffix(vals, ",")
-		query += fmt.Sprintf(" (%v),", vals)
-	}
-
-	_, err := pc.client.Query(ctx, query)
-
-	return err
-}
-
 func (pc *PostgresClient) ReadByPeriod(
 	ctx context.Context,
 	table string,
@@ -129,15 +113,14 @@ func (pc *PostgresClient) ReadByPeriod(
 	cols = strings.TrimSuffix(cols, ",")
 
 	query := fmt.Sprintf(
-		"SELECT %s FROM %s WHERE period_start <= '%s' AND period_end >= '%s' AND user_id = '%s' and file_id = '%s'",
+		"SELECT %s FROM %s WHERE period_start >= '%s' AND period_end <= '%s' AND user_id = '%s' and file_id = '%s'",
 		cols,
 		table,
-		periodStart.Format("2006-01-02"),
-		periodEnd.Format("2006-01-02"),
+		periodStart.Format(layout),
+		periodEnd.Format(layout),
 		userID,
 		fileID,
 	)
-	fmt.Println(query)
 	rows, err := pc.client.Query(
 		ctx,
 		query,
@@ -166,38 +149,6 @@ func (pc *PostgresClient) ReadByPeriod(
 	return data, nil
 }
 
-func (pc *PostgresClient) ReadDynamic(ctx context.Context, table string) ([][]interface{}, error) {
-	rows, err := pc.client.Query(ctx, fmt.Sprintf("SELECT * FROM %s", table))
-	if err != nil {
-		return nil, err
-	}
-
-	res := [][]interface{}{}
-
-	cols := rows.FieldDescriptions()
-	if err != nil {
-		return nil, err
-	}
-	count := len(cols)
-	vals := make([]interface{}, count)
-	valsPtrs := make([]interface{}, count)
-
-	for i := range cols {
-		valsPtrs[i] = &vals[i]
-	}
-
-	for rows.Next() {
-		if err := rows.Scan(valsPtrs...); err != nil {
-			return nil, err
-		}
-		row := []interface{}{}
-		row = append(row, vals...)
-		res = append(res, row)
-	}
-
-	return res, nil
-}
-
 func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID string) error {
 	_, err := pc.client.Query(
 		ctx,
@@ -210,4 +161,10 @@ func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID stri
 	)
 
 	return err
+}
+
+func (pc *PostgresClient) Query(ctx context.Context, query string) (pgx.Rows, error) {
+	rows, err := pc.client.Query(ctx, query)
+
+	return rows, err
 }

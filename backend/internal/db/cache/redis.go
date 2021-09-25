@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -14,9 +15,10 @@ type RedisClient struct {
 }
 
 type Options struct {
-	Addr     string
+	Host     string
+	Port     string
 	Password string
-	DB       int
+	DB       string
 }
 
 var (
@@ -43,10 +45,11 @@ func NewRedisClient(ctx context.Context, options *Options) (*RedisClient, error)
 }
 
 func getRedisClient(ctx context.Context, options *Options) (*redis.Client, error) {
+	dbOpt, _ := strconv.Atoi(options.DB)
 	opts := redis.Options{
-		Addr:     options.Addr,
+		Addr:     fmt.Sprintf("%s:%s", options.Host, options.Port),
 		Password: options.Password,
-		DB:       options.DB,
+		DB:       dbOpt,
 	}
 	client := redis.NewClient(&opts)
 

@@ -9,7 +9,5 @@ import (
 type StorageRepository interface {
 	AddInvoices([]domain.Invoice) ([]domain.Invoice, error)
 	GetInvoicesByPeriod(string, string, time.Time, time.Time) ([]domain.Invoice, error)
-	AddRecords(string, [][]interface{}) ([][]interface{}, error)
-	GetRecords(string) ([][]interface{}, error)
 	DeleteInvoices(string, string) error
 }

@@ -66,25 +66,12 @@ func (pr *postgresRepo) GetInvoicesByPeriod(userID, fileID string, periodStart, 
 			PeriodStart: invoice.PeriodStart.Format("2006-01-02"),
 			PaidPlan:    invoice.PaidPlan,
 			PaidAmount:  invoice.PaidAmount,
-			PeriodEnd:   invoice.PeriodStart.Format("2006-01-02"),
+			PeriodEnd:   invoice.PeriodEnd.Format("2006-01-02"),
 		}
 		mappedInvoices = append(mappedInvoices, mappedInvoice)
 	}
 
 	return mappedInvoices, nil
-}
-
-func (pr *postgresRepo) AddRecords(table string, data [][]interface{}) ([][]interface{}, error) {
-	err := pr.storageClient.CreateDynamic(context.Background(), table, data)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-func (pr *postgresRepo) GetRecords(table string) ([][]interface{}, error) {
-	return pr.storageClient.ReadDynamic(context.Background(), table)
 }
 
 func (pr *postgresRepo) DeleteInvoices(userID, fileID string) error {
