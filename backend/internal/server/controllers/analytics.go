@@ -261,7 +261,7 @@ func getMonthsBetween(fdate, sdate time.Time) []string {
 	count := int(smonth - fmonth)
 	count += 12*(syear-fyear) + 1
 
-	months := []string{}
+	var months []string
 
 	for i := 0; i < count; i++ {
 		yearsDif := (int(fmonth) + i) / 12

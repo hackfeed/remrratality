@@ -1,9 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/hackfeed/remrratality/backend/internal/server"
 )
 
 func main() {
-	server.SetupServer().Run()
+	log.Fatalln(server.SetupServer().Run())
 }

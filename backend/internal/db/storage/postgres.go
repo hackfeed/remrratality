@@ -129,7 +129,7 @@ func (pc *PostgresClient) ReadByPeriod(
 		return nil, err
 	}
 
-	data := []Invoice{}
+	var data []Invoice
 	for rows.Next() {
 		invoice := Invoice{}
 		if err := rows.Scan(
@@ -161,10 +161,4 @@ func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID stri
 	)
 
 	return err
-}
-
-func (pc *PostgresClient) Query(ctx context.Context, query string) (pgx.Rows, error) {
-	rows, err := pc.client.Query(ctx, query)
-
-	return rows, err
 }

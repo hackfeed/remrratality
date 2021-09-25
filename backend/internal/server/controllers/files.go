@@ -147,13 +147,13 @@ func SaveFile(c *gin.Context) {
 
 	dir := fmt.Sprintf("static/%v", userID)
 	filename := fmt.Sprintf("%v%v", uuid.New(), fext)
-	filepath := fmt.Sprintf("%v/%v", dir, filename)
+	filepth := fmt.Sprintf("%v/%v", dir, filename)
 
 	if _, err = os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, 0777)
 	}
 
-	err = c.SaveUploadedFile(file, filepath)
+	err = c.SaveUploadedFile(file, filepth)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "Unable to save the file",
@@ -169,7 +169,7 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
-	csvFile, err := os.Open(filepath)
+	csvFile, err := os.Open(filepth)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to find data with given id",
@@ -178,7 +178,7 @@ func SaveFile(c *gin.Context) {
 	}
 	defer csvFile.Close()
 
-	invoices := []*models.Invoice{}
+	var invoices []*models.Invoice
 
 	err = gocsv.UnmarshalFile(csvFile, &invoices)
 	if err != nil {
@@ -219,7 +219,7 @@ func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.Storag
 		return err
 	}
 
-	newFiles := []map[string]interface{}{}
+	var newFiles []map[string]interface{}
 	for _, file := range user.Files {
 		if file["name"] != filename {
 			newFiles = append(newFiles, file)

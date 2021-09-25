@@ -19,3 +19,6 @@ static
 
 # Environment variables
 .env
+
+# IDE files
+.idea
