@@ -24,8 +24,8 @@ import { Options, Vue } from "vue-class-component";
   emits: ["upload-data", "upload-new"],
 })
 export default class AnalyticsPeriodsForm extends Vue {
-  periodStart: string = this.$store.getters["analytics/periodStart"];
-  periodEnd: string = this.$store.getters["analytics/periodEnd"];
+  periodStart = "";
+  periodEnd = "";
 
   submitPeriods(): void {
     this.$store.commit("analytics/setPeriodStart", this.periodStart);
@@ -38,6 +38,11 @@ export default class AnalyticsPeriodsForm extends Vue {
 
   uploadNew(toUpload: boolean): void {
     this.$emit("upload-new", toUpload);
+  }
+
+  mounted(): void {
+    this.periodStart = this.$store.getters["analytics/periodStart"];
+    this.periodEnd = this.$store.getters["analytics/periodEnd"];
   }
 }
 </script>
