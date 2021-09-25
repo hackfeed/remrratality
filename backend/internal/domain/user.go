@@ -86,5 +86,5 @@ func (u *User) HashPassword() (string, error) {
 }
 
 func (u *User) VerifyPassword(password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(password), []byte(*u.Password))
+	return bcrypt.CompareHashAndPassword([]byte(*u.Password), []byte(password))
 }
