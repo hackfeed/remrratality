@@ -34,8 +34,11 @@ func init() {
 	ctx := context.Background()
 
 	userClient, err := user.NewMongoClient(ctx, &user.Options{
-		Host: os.Getenv("MONGO_HOST"),
-		Port: os.Getenv("MONGO_PORT"),
+		Host:     os.Getenv("MONGO_HOST"),
+		Port:     os.Getenv("MONGO_PORT"),
+		User:     os.Getenv("MONGO_USER"),
+		Password: os.Getenv("MONGO_PASS"),
+		DB:       os.Getenv("MONGO_DB"),
 	})
 	if err != nil {
 		log.Fatalln(err)

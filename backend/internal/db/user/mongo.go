@@ -16,8 +16,11 @@ type MongoClient struct {
 }
 
 type Options struct {
-	Host string
-	Port string
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DB       string
 }
 
 type User struct {
@@ -50,7 +53,7 @@ func NewMongoClient(ctx context.Context, options *Options) (*MongoClient, error)
 }
 
 func getMongoClient(ctx context.Context, opts *Options) (*mongo.Client, error) {
-	dbURL := fmt.Sprintf("mongodb://%s:%s", opts.Host, opts.Port)
+	dbURL := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", opts.User, opts.Password, opts.Host, opts.Port, opts.DB)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbURL))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect mongo client, error is: %s", err)

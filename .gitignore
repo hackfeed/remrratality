@@ -1,0 +1,6 @@
+# Environment
+.env
+
+# DB files
+data/db
+data/init
