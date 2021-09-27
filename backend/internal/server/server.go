@@ -90,7 +90,7 @@ func SetupServer() *gin.Engine {
 	{
 		files.GET("/load", controllers.LoadFiles)
 		files.POST("/upload", controllers.SaveFile)
-		files.POST("/delete", controllers.DeleteFile)
+		files.DELETE("/delete/:filename", controllers.DeleteFile)
 	}
 
 	r.POST("/analytics", controllers.GetAnalytics)

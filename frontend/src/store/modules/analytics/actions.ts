@@ -98,17 +98,9 @@ export default {
 
     context.commit("setFiles", responseData.files);
   },
-  async deleteFile(
-    context: ActionContext<AnalyticsState, RootState>,
-    data: Record<string, unknown>
-  ): Promise<void> {
-    const reqData = {
-      name: data,
-    };
-
-    const response = await fetch("http://localhost:8081/files/delete", {
-      method: "POST",
-      body: JSON.stringify(reqData),
+  async deleteFile(context: ActionContext<AnalyticsState, RootState>, data: string): Promise<void> {
+    const response = await fetch(`http://localhost:8081/files/delete/${data}`, {
+      method: "DELETE",
       headers: {
         token: localStorage.getItem("token")!,
       },
@@ -120,9 +112,7 @@ export default {
       throw error;
     }
 
-    const files = context.rootGetters["analytics/files"].filter(
-      (file: File) => file.name != (reqData as Record<string, unknown>).name
-    );
+    const files = context.rootGetters["analytics/files"].filter((file: File) => file.name != data);
 
     context.commit("setFiles", files);
   },

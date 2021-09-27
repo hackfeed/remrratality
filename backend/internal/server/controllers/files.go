@@ -11,10 +11,17 @@ import (
 	"github.com/gocarina/gocsv"
 	"github.com/google/uuid"
 	"github.com/hackfeed/remrratality/backend/internal/domain"
-	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
 )
+
+type Invoice struct {
+	CustomerID  uint32  `csv:"customer_id"`
+	PeriodStart string  `csv:"period_start"`
+	PaidPlan    string  `csv:"paid_plan"`
+	PaidAmount  float32 `csv:"paid_amount"`
+	PeriodEnd   string  `csv:"period_end"`
+}
 
 func LoadFiles(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
@@ -76,17 +83,9 @@ func DeleteFile(c *gin.Context) {
 		return
 	}
 
-	var req models.File
+	filename := c.Param("filename")
 
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to parse request body",
-		})
-		return
-	}
-
-	err = deleteFile(userRepo, storageRepo, email, userID, req.Name)
+	err := deleteFile(userRepo, storageRepo, email, userID, filename)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "Failed to delete file",
@@ -178,7 +177,7 @@ func SaveFile(c *gin.Context) {
 	}
 	defer csvFile.Close()
 
-	var invoices []*models.Invoice
+	var invoices []*Invoice
 
 	err = gocsv.UnmarshalFile(csvFile, &invoices)
 	if err != nil {
@@ -219,7 +218,7 @@ func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.Storag
 		return err
 	}
 
-	var newFiles []map[string]interface{}
+	newFiles := make([]map[string]interface{}, 0)
 	for _, file := range user.Files {
 		if file["name"] != filename {
 			newFiles = append(newFiles, file)
@@ -247,7 +246,7 @@ func updateFiles(userRepo userrepo.UserRepository, email, userID, filename strin
 	return userRepo.UpdateUser(userID, user)
 }
 
-func uploadFile(storageRepo storagerepo.StorageRepository, userID, fileID string, invoices []*models.Invoice) error {
+func uploadFile(storageRepo storagerepo.StorageRepository, userID, fileID string, invoices []*Invoice) error {
 	mappedInvoices := make([]domain.Invoice, 0)
 
 	for _, invoice := range invoices {

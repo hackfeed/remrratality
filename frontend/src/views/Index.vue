@@ -2,7 +2,7 @@
   <div>
     <section class="centered">
       <base-card>
-        <h2>Get full control of your app's money flow with mrratality</h2>
+        <h2>Get full control of your app's money flow with remrratality</h2>
         <base-button link to="/analytics">Try now</base-button>
       </base-card>
       <base-card>
