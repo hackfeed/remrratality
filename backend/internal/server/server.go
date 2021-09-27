@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	docs "github.com/hackfeed/remrratality/backend/docs"
 	"github.com/hackfeed/remrratality/backend/internal/db/cache"
 	"github.com/hackfeed/remrratality/backend/internal/db/storage"
 	"github.com/hackfeed/remrratality/backend/internal/db/user"
@@ -17,6 +18,8 @@ import (
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var (
@@ -81,19 +84,26 @@ func SetupServer() *gin.Engine {
 	r.Use(middlewares.StorageRepo(storageRepo))
 	r.Use(middlewares.CacheRepo(cacheRepo))
 
-	r.POST("/signup", controllers.SignUp)
-	r.POST("/login", controllers.Login)
-
-	r.Use(middlewares.Auth())
-
-	files := r.Group("/files")
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	v1 := r.Group("/api/v1")
 	{
-		files.GET("/load", controllers.LoadFiles)
-		files.POST("/upload", controllers.SaveFile)
-		files.DELETE("/delete/:filename", controllers.DeleteFile)
+		auth := v1.Group("auth")
+		{
+			auth.POST("/signup", controllers.SignUp)
+			auth.POST("/login", controllers.Login)
+		}
+		files := v1.Group("/files", middlewares.Auth())
+		{
+			files.GET("/load", controllers.LoadFiles)
+			files.POST("/upload", controllers.SaveFile)
+			files.DELETE("/delete/:filename", controllers.DeleteFile)
+		}
+		analytics := v1.Group("analytics", middlewares.Auth())
+		{
+			analytics.POST("/mrr", controllers.GetAnalytics)
+		}
+		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
-
-	r.POST("/analytics", controllers.GetAnalytics)
 
 	return r
 }

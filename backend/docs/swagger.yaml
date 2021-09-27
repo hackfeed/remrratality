@@ -1,0 +1,89 @@
+basePath: /api/v1
+definitions:
+  domain.File:
+    properties:
+      name:
+        type: string
+      uploaded_at:
+        type: string
+    type: object
+  models.ResponseFailLoadFiles:
+    properties:
+      message:
+        example: Unable to determine logged in user
+        type: string
+    type: object
+  models.ResponseSuccessLoadFiles:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/domain.File'
+        type: array
+      message:
+        example: Files are loaded
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact:
+    email: hackfeed@vk.com
+    name: Sergey "hackfeed" Kononenko
+    url: https://hackfeed.github.io
+  description: API for getting MRR analytics of your app's money flow.
+  license:
+    name: GPL-3.0 License
+    url: http://www.gnu.org/licenses/gpl-3.0.html
+  title: remrratality API
+  version: "1.0"
+paths:
+  /files/delete/{filename}:
+    delete:
+      consumes:
+      - application/json
+      description: Deleting file and cleaning database
+      produces:
+      - application/json
+      security:
+      - ApiKeyAuth: []
+      summary: Deleting user's file
+      tags:
+      - files
+  /files/load:
+    get:
+      consumes:
+      - application/json
+      description: Loading files' names, uploaded by user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessLoadFiles'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseFailLoadFiles'
+      security:
+      - ApiKeyAuth: []
+      summary: Loading user's files
+      tags:
+      - files
+  /files/upload:
+    post:
+      consumes:
+      - application/json
+      description: Saving file locally on the server and parsing its content to database
+      produces:
+      - application/json
+      security:
+      - ApiKeyAuth: []
+      summary: Saving user's file
+      tags:
+      - files
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: token
+    type: apiKey
+swagger: "2.0"

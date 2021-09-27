@@ -43,7 +43,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 	mappedUser.RefreshToken = &refreshToken
 	mappedUser.CreatedAt = createdAt
 	mappedUser.UpdatedAt = updatedAt
-	mappedUser.Files = []map[string]interface{}{}
+	mappedUser.Files = []user.File{}
 
 	_, err = mr.userClient.Create(mappedUser)
 	if err != nil {
@@ -55,7 +55,11 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 	internalUser.RefreshToken = mappedUser.RefreshToken
 	internalUser.CreatedAt = mappedUser.CreatedAt
 	internalUser.UpdatedAt = mappedUser.UpdatedAt
-	internalUser.Files = mappedUser.Files
+	internalFiles := []domain.File{}
+	for _, file := range mappedUser.Files {
+		internalFiles = append(internalFiles, domain.File{Name: file.Name, UploadedAt: file.UploadedAt})
+	}
+	internalUser.Files = internalFiles
 
 	return internalUser, nil
 }
@@ -66,6 +70,11 @@ func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
 		return domain.User{}, err
 	}
 
+	mappedFiles := []domain.File{}
+	for _, file := range user.Files {
+		mappedFiles = append(mappedFiles, domain.File{Name: file.Name, UploadedAt: file.UploadedAt})
+	}
+
 	mappedUser := domain.User{
 		UserID:       user.UserID,
 		Email:        user.Email,
@@ -74,7 +83,7 @@ func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
 		RefreshToken: user.RefreshToken,
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,
-		Files:        user.Files,
+		Files:        mappedFiles,
 	}
 
 	return mappedUser, nil

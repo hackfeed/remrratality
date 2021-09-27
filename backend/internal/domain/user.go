@@ -9,6 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type File struct {
+	Name       string    `json:"name"`
+	UploadedAt time.Time `json:"uploaded_at"`
+}
+
 type User struct {
 	UserID       string
 	Email        *string
@@ -17,7 +22,7 @@ type User struct {
 	RefreshToken *string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	Files        []map[string]interface{}
+	Files        []File
 }
 
 type signedDetails struct {

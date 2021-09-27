@@ -23,16 +23,21 @@ type Options struct {
 	DB       string
 }
 
+type File struct {
+	Name       string    `bson:"name"`
+	UploadedAt time.Time `bson:"uploaded_at"`
+}
+
 type User struct {
-	ID           primitive.ObjectID       `bson:"_id"`
-	UserID       string                   `bson:"user_id"`
-	Email        *string                  `bson:"email" validate:"email,required"`
-	Password     *string                  `bson:"password" validate:"required,min=6"`
-	Token        *string                  `bson:"token"`
-	RefreshToken *string                  `bson:"refresh_token"`
-	CreatedAt    time.Time                `bson:"created_at"`
-	UpdatedAt    time.Time                `bson:"updated_at"`
-	Files        []map[string]interface{} `bson:"files" json:"files"`
+	ID           primitive.ObjectID `bson:"_id"`
+	UserID       string             `bson:"user_id"`
+	Email        *string            `bson:"email" validate:"email,required"`
+	Password     *string            `bson:"password" validate:"required,min=6"`
+	Token        *string            `bson:"token"`
+	RefreshToken *string            `bson:"refresh_token"`
+	CreatedAt    time.Time          `bson:"created_at"`
+	UpdatedAt    time.Time          `bson:"updated_at"`
+	Files        []File             `bson:"files"`
 }
 
 var mongoClient *MongoClient

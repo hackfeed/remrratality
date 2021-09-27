@@ -11,6 +11,7 @@ import (
 	"github.com/gocarina/gocsv"
 	"github.com/google/uuid"
 	"github.com/hackfeed/remrratality/backend/internal/domain"
+	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
 )
@@ -23,36 +24,54 @@ type Invoice struct {
 	PeriodEnd   string  `csv:"period_end"`
 }
 
+// LoadFiles godoc
+// @Summary Loading user's files
+// @Description Loading files' names, uploaded by user
+// @Tags files
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} models.ResponseSuccessLoadFiles
+// @Failure 500 {object} models.ResponseFailLoadFiles
+// @Security ApiKeyAuth
+// @Router /files/load [get]
 func LoadFiles(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to determine logged in user",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseFailLoadFiles{
+			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get user_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseFailLoadFiles{
+			Message: "Failed to get user_repo",
 		})
 		return
 	}
 
 	files, err := loadFiles(userRepo, email)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to fetch user files",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseFailLoadFiles{
+			Message: "Failed to fetch user files",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Files are loaded",
-		"files":   files,
+	c.JSON(http.StatusOK, models.ResponseSuccessLoadFiles{
+		Message: "Files are loaded",
+		Files:   files,
 	})
 }
 
+// DeleteFile godoc
+// @Summary Deleting user's file
+// @Description Deleting file and cleaning database
+// @Tags files
+// @Accept  json
+// @Produce  json
+// @Security ApiKeyAuth
+// @Router /files/delete/{filename} [delete]
 func DeleteFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
@@ -98,6 +117,14 @@ func DeleteFile(c *gin.Context) {
 	})
 }
 
+// SaveFile godoc
+// @Summary Saving user's file
+// @Description Saving file locally on the server and parsing its content to database
+// @Tags files
+// @Accept  json
+// @Produce  json
+// @Security ApiKeyAuth
+// @Router /files/upload [post]
 func SaveFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
@@ -201,7 +228,7 @@ func SaveFile(c *gin.Context) {
 	})
 }
 
-func loadFiles(userRepo userrepo.UserRepository, email string) ([]map[string]interface{}, error) {
+func loadFiles(userRepo userrepo.UserRepository, email string) ([]domain.File, error) {
 	user, err := userRepo.GetUser(email)
 
 	return user.Files, err
@@ -218,9 +245,9 @@ func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.Storag
 		return err
 	}
 
-	newFiles := make([]map[string]interface{}, 0)
+	newFiles := make([]domain.File, 0)
 	for _, file := range user.Files {
-		if file["name"] != filename {
+		if file.Name != filename {
 			newFiles = append(newFiles, file)
 		}
 	}
@@ -241,7 +268,7 @@ func updateFiles(userRepo userrepo.UserRepository, email, userID, filename strin
 	}
 
 	uploadedAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-	user.Files = append(user.Files, map[string]interface{}{"name": filename, "uploaded_at": uploadedAt})
+	user.Files = append(user.Files, domain.File{Name: filename, UploadedAt: uploadedAt})
 
 	return userRepo.UpdateUser(userID, user)
 }
