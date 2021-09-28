@@ -4,3 +4,6 @@
 # DB files
 data/db
 data/init
+
+# OSX files
+.DS_Store

@@ -31,20 +31,20 @@ type Invoice struct {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} models.ResponseSuccessLoadFiles
-// @Failure 500 {object} models.ResponseFailLoadFiles
+// @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
 // @Router /files/load [get]
 func LoadFiles(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseFailLoadFiles{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseFailLoadFiles{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get user_repo",
 		})
 		return
@@ -52,7 +52,7 @@ func LoadFiles(c *gin.Context) {
 
 	files, err := loadFiles(userRepo, email)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseFailLoadFiles{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to fetch user files",
 		})
 		return
@@ -70,34 +70,38 @@ func LoadFiles(c *gin.Context) {
 // @Tags files
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
+// @Param filename path string true "File to delete"
 // @Router /files/delete/{filename} [delete]
 func DeleteFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to determine logged in user",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to determine logged in user",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get user_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to get user_repo",
 		})
 		return
 	}
 	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get storage_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to get storage_repo",
 		})
 		return
 	}
@@ -106,14 +110,14 @@ func DeleteFile(c *gin.Context) {
 
 	err := deleteFile(userRepo, storageRepo, email, userID, filename)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to delete file",
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "Failed to delete file",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "File deleted",
+	c.JSON(http.StatusOK, models.Response{
+		Message: "File deleted",
 	})
 }
 
@@ -123,50 +127,54 @@ func DeleteFile(c *gin.Context) {
 // @Tags files
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} models.ResponseSuccessSaveFile
+// @Failure 400 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
+// @Param file formData file true "File to upload"
 // @Router /files/upload [post]
 func SaveFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to determine logged in user",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to determine logged in user",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get user_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to get user_repo",
 		})
 		return
 	}
 	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get storage_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to get storage_repo",
 		})
 		return
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "No file is received",
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "No file is received",
 		})
 		return
 	}
 
 	fext := filepath.Ext(file.Filename)
 	if fext != ".csv" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Wrong file format. Please provide CSV file",
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "Wrong file format. Please provide CSV file",
 		})
 		return
 	}
@@ -181,24 +189,24 @@ func SaveFile(c *gin.Context) {
 
 	err = c.SaveUploadedFile(file, filepth)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to save the file",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to save the file",
 		})
 		return
 	}
 
 	err = updateFiles(userRepo, email, userID, filename)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to update user in db",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to update user in db",
 		})
 		return
 	}
 
 	csvFile, err := os.Open(filepth)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to find data with given id",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to find data with given id",
 		})
 		return
 	}
@@ -208,23 +216,23 @@ func SaveFile(c *gin.Context) {
 
 	err = gocsv.UnmarshalFile(csvFile, &invoices)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to parse given CSV file",
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "Failed to parse given CSV file",
 		})
 		return
 	}
 
 	err = uploadFile(storageRepo, userID, filename, invoices)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to upload data to database",
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "Failed to upload data to database",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "File uploaded",
-		"filename": filename,
+	c.JSON(http.StatusOK, models.ResponseSuccessSaveFile{
+		Message:  "File is uploaded",
+		Filename: filename,
 	})
 }
 

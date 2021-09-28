@@ -48,7 +48,36 @@ var doc = `{
                 "tags": [
                     "files"
                 ],
-                "summary": "Deleting user's file"
+                "summary": "Deleting user's file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File to delete",
+                        "name": "filename",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
             }
         },
         "/files/load": {
@@ -79,7 +108,7 @@ var doc = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseFailLoadFiles"
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -102,7 +131,36 @@ var doc = `{
                 "tags": [
                     "files"
                 ],
-                "summary": "Saving user's file"
+                "summary": "Saving user's file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccessSaveFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
             }
         }
     },
@@ -118,12 +176,11 @@ var doc = `{
                 }
             }
         },
-        "models.ResponseFailLoadFiles": {
+        "models.Response": {
             "type": "object",
             "properties": {
                 "message": {
-                    "type": "string",
-                    "example": "Unable to determine logged in user"
+                    "type": "string"
                 }
             }
         },
@@ -139,6 +196,18 @@ var doc = `{
                 "message": {
                     "type": "string",
                     "example": "Files are loaded"
+                }
+            }
+        },
+        "models.ResponseSuccessSaveFile": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Files is uploaded"
                 }
             }
         }

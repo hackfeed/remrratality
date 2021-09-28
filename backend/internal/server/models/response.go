@@ -7,6 +7,11 @@ type ResponseSuccessLoadFiles struct {
 	Files   []domain.File `json:"files"`
 }
 
-type ResponseFailLoadFiles struct {
-	Message string `json:"message" example:"Unable to determine logged in user"`
+type ResponseSuccessSaveFile struct {
+	Message  string `json:"message" example:"Files is uploaded"`
+	Filename string `json:"filename"`
+}
+
+type Response struct {
+	Message string `json:"message"`
 }

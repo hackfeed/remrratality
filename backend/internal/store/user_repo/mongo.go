@@ -55,10 +55,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 	internalUser.RefreshToken = mappedUser.RefreshToken
 	internalUser.CreatedAt = mappedUser.CreatedAt
 	internalUser.UpdatedAt = mappedUser.UpdatedAt
-	internalFiles := []domain.File{}
-	for _, file := range mappedUser.Files {
-		internalFiles = append(internalFiles, domain.File{Name: file.Name, UploadedAt: file.UploadedAt})
-	}
+	internalFiles := convertFilesToDomain(mappedUser.Files)
 	internalUser.Files = internalFiles
 
 	return internalUser, nil
@@ -70,10 +67,7 @@ func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
 		return domain.User{}, err
 	}
 
-	mappedFiles := []domain.File{}
-	for _, file := range user.Files {
-		mappedFiles = append(mappedFiles, domain.File{Name: file.Name, UploadedAt: file.UploadedAt})
-	}
+	mappedFiles := convertFilesToDomain(user.Files)
 
 	mappedUser := domain.User{
 		UserID:       user.UserID,
@@ -98,7 +92,23 @@ func (mr *mongoRepo) UpdateUser(user_id string, user domain.User) error {
 		bson.E{"refresh_token", user.RefreshToken},
 		bson.E{"created_at", user.CreatedAt},
 		bson.E{"updated_at", user.UpdatedAt},
-		bson.E{"files", user.Files},
+		bson.E{"files", convertFilesToUser(user.Files)},
 	}
 	return mr.userClient.Update(updatedUser, "user_id", user_id)
+}
+
+func convertFilesToDomain(userFiles []user.File) []domain.File {
+	convertedFiles := []domain.File{}
+	for _, file := range userFiles {
+		convertedFiles = append(convertedFiles, domain.File{Name: file.Name, UploadedAt: file.UploadedAt})
+	}
+	return convertedFiles
+}
+
+func convertFilesToUser(domainFiles []domain.File) []user.File {
+	convertedFiles := []user.File{}
+	for _, file := range domainFiles {
+		convertedFiles = append(convertedFiles, user.File{Name: file.Name, UploadedAt: file.UploadedAt})
+	}
+	return convertedFiles
 }

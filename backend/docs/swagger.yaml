@@ -7,10 +7,9 @@ definitions:
       uploaded_at:
         type: string
     type: object
-  models.ResponseFailLoadFiles:
+  models.Response:
     properties:
       message:
-        example: Unable to determine logged in user
         type: string
     type: object
   models.ResponseSuccessLoadFiles:
@@ -21,6 +20,14 @@ definitions:
         type: array
       message:
         example: Files are loaded
+        type: string
+    type: object
+  models.ResponseSuccessSaveFile:
+    properties:
+      filename:
+        type: string
+      message:
+        example: Files is uploaded
         type: string
     type: object
 host: localhost:8081
@@ -41,8 +48,27 @@ paths:
       consumes:
       - application/json
       description: Deleting file and cleaning database
+      parameters:
+      - description: File to delete
+        in: path
+        name: filename
+        required: true
+        type: string
       produces:
       - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: Deleting user's file
@@ -63,7 +89,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ResponseFailLoadFiles'
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: Loading user's files
@@ -74,8 +100,27 @@ paths:
       consumes:
       - application/json
       description: Saving file locally on the server and parsing its content to database
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
       produces:
       - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessSaveFile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: Saving user's file
