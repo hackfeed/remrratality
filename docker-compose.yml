@@ -32,6 +32,14 @@ services:
     ports:
       - ${MONGO_PORT}:27017
 
+  adminer:
+    image: dockette/adminer:full
+    container_name: remrratality-adminer
+    env_file:
+      - .env
+    ports:
+      - 8000:80
+
   frontend:
     build:
       context: ./frontend
