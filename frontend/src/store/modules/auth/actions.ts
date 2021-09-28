@@ -28,11 +28,11 @@ export default {
       throw error;
     }
 
-    const expirationDate = +responseData.expiresAt;
+    const expirationDate = +responseData.expires_at;
     const expiresIn = expirationDate * 1000 - new Date().getTime();
 
-    localStorage.setItem("token", responseData.idToken);
-    localStorage.setItem("userId", responseData.localId);
+    localStorage.setItem("token", responseData.id_token);
+    localStorage.setItem("userID", responseData.local_id);
     localStorage.setItem("tokenExpiration", expirationDate.toString());
 
     timer = setTimeout(() => {
@@ -40,13 +40,13 @@ export default {
     }, expiresIn);
 
     context.commit("setUser", {
-      token: responseData.idToken,
-      userId: responseData.localId,
+      token: responseData.id_token,
+      userId: responseData.local_id,
     });
   },
   tryLogin(context: ActionContext<AuthState, RootState>): void {
     const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
+    const userId = localStorage.getItem("userID");
     const tokenExpiration = localStorage.getItem("tokenExpiration");
 
     const expiresIn = +tokenExpiration! * 1000 - new Date().getTime();
@@ -80,7 +80,7 @@ export default {
   },
   logout(context: ActionContext<AuthState, RootState>): void {
     localStorage.removeItem("token");
-    localStorage.removeItem("userId");
+    localStorage.removeItem("userID");
     localStorage.removeItem("tokenExpiration");
 
     clearTimeout(timer);

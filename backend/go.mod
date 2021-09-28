@@ -10,7 +10,9 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20210516172204-ca9e8a8ddea8
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.13.0
-	github.com/joho/godotenv v1.4.0
+	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
+	github.com/swaggo/gin-swagger v1.3.2
+	github.com/swaggo/swag v1.7.3
 	go.mongodb.org/mongo-driver v1.7.2
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 )
@@ -50,9 +52,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
-	github.com/swaggo/gin-swagger v1.3.2 // indirect
-	github.com/swaggo/swag v1.7.3 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect

@@ -7,8 +7,78 @@ definitions:
       uploaded_at:
         type: string
     type: object
+  domain.TotalMRR:
+    properties:
+      churn:
+        items:
+          type: number
+        type: array
+      contraction:
+        items:
+          type: number
+        type: array
+      expansion:
+        items:
+          type: number
+        type: array
+      new:
+        items:
+          type: number
+        type: array
+      old:
+        items:
+          type: number
+        type: array
+      reactivation:
+        items:
+          type: number
+        type: array
+      total:
+        items:
+          type: number
+        type: array
+    type: object
+  models.Period:
+    properties:
+      filename:
+        example: filename.csv
+        type: string
+      period_end:
+        example: "2021-01-01"
+        type: string
+      period_start:
+        example: "2019-01-01"
+        type: string
+    required:
+    - filename
+    - period_end
+    - period_start
+    type: object
   models.Response:
     properties:
+      message:
+        type: string
+    type: object
+  models.ResponseSuccessAnalytics:
+    properties:
+      message:
+        example: Analytics is loaded
+        type: string
+      months:
+        items:
+          type: string
+        type: array
+      mrr:
+        $ref: '#/definitions/domain.TotalMRR'
+    type: object
+  models.ResponseSuccessAuth:
+    properties:
+      expires_at:
+        type: integer
+      id_token:
+        type: string
+      local_id:
+        type: string
       message:
         type: string
     type: object
@@ -25,10 +95,23 @@ definitions:
   models.ResponseSuccessSaveFile:
     properties:
       filename:
+        example: filename.csv
         type: string
       message:
-        example: Files is uploaded
+        example: File is uploaded
         type: string
+    type: object
+  models.User:
+    properties:
+      email:
+        example: test@test.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
     type: object
 host: localhost:8081
 info:
@@ -43,6 +126,98 @@ info:
   title: remrratality API
   version: "1.0"
 paths:
+  /analytics/mrr:
+    post:
+      consumes:
+      - application/json
+      description: Getting MRR analytics data with all components for given period
+      parameters:
+      - description: Parameters for MRR analytics
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Period'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessAnalytics'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get MRR analytics data
+      tags:
+      - analytics
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Logging user in by retrieving his data from the database
+      parameters:
+      - description: User's email and password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessAuth'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Logging user in
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Signing user up by adding him to the database
+      parameters:
+      - description: User's email and password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessAuth'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Signing user up
+      tags:
+      - auth
   /files/delete/{filename}:
     delete:
       consumes:

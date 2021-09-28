@@ -1,5 +1,6 @@
 # Environment
-.env
+.env*
+!.env.*_*
 
 # DB files
 data/db

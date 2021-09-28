@@ -17,7 +17,6 @@ import (
 	cacherepo "github.com/hackfeed/remrratality/backend/internal/store/cache_repo"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
-	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -29,11 +28,6 @@ var (
 )
 
 func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalln("Failed to load .env file")
-	}
-
 	ctx := context.Background()
 
 	userClient, err := user.NewMongoClient(ctx, &user.Options{
@@ -78,6 +72,7 @@ func SetupServer() *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"token"}
+	config.AllowMethods = []string{"GET", "POST", "DELETE"}
 	r.Use(cors.New(config))
 
 	r.Use(middlewares.UserRepo(userRepo))

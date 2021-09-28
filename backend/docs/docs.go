@@ -31,6 +31,149 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/analytics/mrr": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Getting MRR analytics data with all components for given period",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analytics"
+                ],
+                "summary": "Get MRR analytics data",
+                "parameters": [
+                    {
+                        "description": "Parameters for MRR analytics",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Period"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccessAnalytics"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Logging user in by retrieving his data from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logging user in",
+                "parameters": [
+                    {
+                        "description": "User's email and password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccessAuth"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "description": "Signing user up by adding him to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Signing user up",
+                "parameters": [
+                    {
+                        "description": "User's email and password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccessAuth"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/files/delete/{filename}": {
             "delete": {
                 "security": [
@@ -176,9 +319,113 @@ var doc = `{
                 }
             }
         },
+        "domain.TotalMRR": {
+            "type": "object",
+            "properties": {
+                "churn": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "contraction": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "expansion": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "new": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "old": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "reactivation": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "total": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "models.Period": {
+            "type": "object",
+            "required": [
+                "filename",
+                "period_end",
+                "period_start"
+            ],
+            "properties": {
+                "filename": {
+                    "type": "string",
+                    "example": "filename.csv"
+                },
+                "period_end": {
+                    "type": "string",
+                    "example": "2021-01-01"
+                },
+                "period_start": {
+                    "type": "string",
+                    "example": "2019-01-01"
+                }
+            }
+        },
         "models.Response": {
             "type": "object",
             "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseSuccessAnalytics": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Analytics is loaded"
+                },
+                "months": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "mrr": {
+                    "$ref": "#/definitions/domain.TotalMRR"
+                }
+            }
+        },
+        "models.ResponseSuccessAuth": {
+            "type": "object",
+            "properties": {
+                "expires_at": {
+                    "type": "integer"
+                },
+                "id_token": {
+                    "type": "string"
+                },
+                "local_id": {
+                    "type": "string"
+                },
                 "message": {
                     "type": "string"
                 }
@@ -203,11 +450,29 @@ var doc = `{
             "type": "object",
             "properties": {
                 "filename": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "filename.csv"
                 },
                 "message": {
                     "type": "string",
-                    "example": "Files is uploaded"
+                    "example": "File is uploaded"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         }

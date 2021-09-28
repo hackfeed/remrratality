@@ -17,25 +17,37 @@ var (
 	layout = "2006-01-02"
 )
 
+// GetAnalytics godoc
+// @Summary Get MRR analytics data
+// @Description Getting MRR analytics data with all components for given period
+// @Tags analytics
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} models.ResponseSuccessAnalytics
+// @Failure 400 {object} models.Response
+// @Failure 500 {object} models.Response
+// @Security ApiKeyAuth
+// @Param request body models.Period true "Parameters for MRR analytics"
+// @Router /analytics/mrr [post]
 func GetAnalytics(c *gin.Context) {
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to determine logged in user",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Unable to determine logged in user",
 		})
 		return
 	}
 	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get storage_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to get storage_repo",
 		})
 		return
 	}
 	cacheRepo, ok := c.MustGet("cache_repo").(cacherepo.CacheRepository)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to get cache_repo",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: "Failed to get cache_repo",
 		})
 		return
 	}
@@ -44,24 +56,24 @@ func GetAnalytics(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to parse request body",
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "Failed to parse request body",
 		})
 		return
 	}
 
 	months, mrr, err := getAnalytics(storageRepo, cacheRepo, userID, req.Filename, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			Message: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Analytics is loaded",
-		"months":  months,
-		"mrr":     mrr,
+	c.JSON(http.StatusOK, models.ResponseSuccessAnalytics{
+		Message: "Analytics is loaded",
+		Months:  months,
+		MRR:     mrr,
 	})
 }
 
