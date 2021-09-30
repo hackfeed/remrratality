@@ -75,7 +75,7 @@ func getPostgresClient(ctx context.Context, options *Options) (*pgxpool.Pool, er
 func (pc *PostgresClient) Create(ctx context.Context, table string, fields []string, invoices []Invoice) error {
 	tx, err := pc.client.Begin(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to begin postgres transaction, error is: %s", err)
 	}
 	defer tx.Rollback(ctx)
 
@@ -91,9 +91,8 @@ func (pc *PostgresClient) Create(ctx context.Context, table string, fields []str
 			invoices[i].PeriodEnd,
 		}
 	}
-	_, err = pc.client.CopyFrom(ctx, pgx.Identifier{table}, fields, pgx.CopyFromRows(data))
-	if err != nil {
-		return err
+	if _, err = pc.client.CopyFrom(ctx, pgx.Identifier{table}, fields, pgx.CopyFromRows(data)); err != nil {
+		return fmt.Errorf("failed to copy records to postgres from prepared data, error is: %s", err)
 	}
 
 	return tx.Commit(ctx)
@@ -126,7 +125,7 @@ func (pc *PostgresClient) ReadByPeriod(
 		query,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to run postgres query, error is: %s", err)
 	}
 
 	var data []Invoice
@@ -141,7 +140,7 @@ func (pc *PostgresClient) ReadByPeriod(
 			&invoice.PaidAmount,
 			&invoice.PeriodEnd,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to map row to data, error is: %s", err)
 		}
 		data = append(data, invoice)
 	}
@@ -150,7 +149,7 @@ func (pc *PostgresClient) ReadByPeriod(
 }
 
 func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID string) error {
-	_, err := pc.client.Query(
+	if _, err := pc.client.Query(
 		ctx,
 		fmt.Sprintf(
 			"DELETE FROM %s WHERE user_id = '%s' AND file_id = '%s'",
@@ -158,7 +157,9 @@ func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID stri
 			userID,
 			fileID,
 		),
-	)
+	); err != nil {
+		return fmt.Errorf("failed to run postgres query, error is: %s", err)
+	}
 
-	return err
+	return nil
 }

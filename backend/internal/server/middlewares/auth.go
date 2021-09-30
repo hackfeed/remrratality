@@ -2,12 +2,15 @@ package middlewares
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/hackfeed/remrratality/backend/internal/server/models"
+	log "github.com/sirupsen/logrus"
 )
 
 type signedDetails struct {
@@ -20,16 +23,18 @@ func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientToken := c.Request.Header.Get("token")
 		if clientToken == "" {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"message": "No Authorization header provided",
+			log.Errorf("failed to get authorization header")
+			c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+				Message: "No Authorization header provided",
 			})
 			return
 		}
 
 		claims, err := validateToken(clientToken)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"message": "Token validation failed",
+			log.Errorf("failed to validate %s token", clientToken)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+				Message: "Token validation failed",
 			})
 			return
 		}
@@ -50,7 +55,7 @@ func validateToken(signedToken string) (*signedDetails, error) {
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to obtain token, error is: %s", err)
 	}
 
 	claims, ok := token.Claims.(*signedDetails)

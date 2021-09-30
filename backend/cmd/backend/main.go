@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
+	"os"
 
 	"github.com/hackfeed/remrratality/backend/internal/server"
+	log "github.com/sirupsen/logrus"
 )
 
 // @title remrratality API
@@ -25,5 +26,12 @@ import (
 // @name token
 
 func main() {
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatalf("failed to create logs file, error is: %s", err)
+	}
+
+	log.SetOutput(file)
+
 	log.Fatalln(server.SetupServer().Run())
 }

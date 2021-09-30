@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -50,11 +51,14 @@ func (u *User) GenerateTokens() (string, string, error) {
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
-		return token, refreshToken, err
+		return token, refreshToken, fmt.Errorf("failed create new token, error is: %s", err)
 	}
 	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(os.Getenv("SECRET_KEY")))
+	if err != nil {
+		return token, refreshToken, fmt.Errorf("failed create new refresh token, error is: %s", err)
+	}
 
-	return token, refreshToken, err
+	return token, refreshToken, nil
 }
 
 func (u *User) UpdateTokens(signedToken, signedRefreshToken string) {
@@ -74,7 +78,7 @@ func (u *User) GetExpirationTime() (int64, error) {
 		},
 	)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to get token, error is: %s", err)
 	}
 	claims, ok := token.Claims.(*signedDetails)
 	if !ok {
@@ -86,8 +90,11 @@ func (u *User) GetExpirationTime() (int64, error) {
 
 func (u *User) HashPassword() (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(*u.Password), 14)
+	if err != nil {
+		return "", fmt.Errorf("failed to hash password, error is: %s", err)
+	}
 
-	return string(bytes), err
+	return string(bytes), nil
 }
 
 func (u *User) VerifyPassword(password string) error {

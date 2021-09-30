@@ -11,6 +11,7 @@ import (
 	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	cacherepo "github.com/hackfeed/remrratality/backend/internal/store/cache_repo"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -32,6 +33,7 @@ var (
 func GetAnalytics(c *gin.Context) {
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
+		log.Errorf("failed to get user_id from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
@@ -39,6 +41,7 @@ func GetAnalytics(c *gin.Context) {
 	}
 	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
 	if !ok {
+		log.Errorf("failed to get storage_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get storage_repo",
 		})
@@ -46,6 +49,7 @@ func GetAnalytics(c *gin.Context) {
 	}
 	cacheRepo, ok := c.MustGet("cache_repo").(cacherepo.CacheRepository)
 	if !ok {
+		log.Errorf("failed to get cache_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get cache_repo",
 		})
@@ -54,8 +58,8 @@ func GetAnalytics(c *gin.Context) {
 
 	var req models.Period
 
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Errorf("failed to parse request body, error is: %s", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to parse request body",
 		})
@@ -64,8 +68,9 @@ func GetAnalytics(c *gin.Context) {
 
 	months, mrr, err := getAnalytics(storageRepo, cacheRepo, userID, req.Filename, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
+		log.Errorf("failed to get MRR analytics, error is: %s", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
-			Message: err.Error(),
+			Message: "Failed to get analytics. Please ensure that period start is earlier than period end and data exists in given period",
 		})
 		return
 	}
@@ -83,17 +88,23 @@ func getAnalytics(storageRepo storagerepo.StorageRepository, cacheRepo cacherepo
 		months []string
 	)
 
-	periodStartDate, _ := time.Parse(layout, periodStart)
-	periodEndDate, _ := time.Parse(layout, periodEnd)
+	periodStartDate, err := time.Parse(layout, periodStart)
+	if err != nil {
+		return months, mrr, fmt.Errorf("failed parse period start date, error is: %s", err)
+	}
+	periodEndDate, err := time.Parse(layout, periodEnd)
+	if err != nil {
+		return months, mrr, fmt.Errorf("failed parse period end date, error is: %s", err)
+	}
 
 	if periodStartDate.After(periodEndDate) {
-		return months, mrr, errors.New("Period start should be less than period end")
+		return months, mrr, errors.New("period start should be less than period end")
 	}
 
 	userFilePeriod := fmt.Sprintf("%s.%s-%s-%s", userID, fileID, periodStart, periodEnd)
-	mrr, err := cacheRepo.GetMRR(userFilePeriod)
+	mrr, err = cacheRepo.GetMRR(userFilePeriod)
 	if err != nil {
-		return months, mrr, err
+		return months, mrr, fmt.Errorf("failed to get mrr from cache, error is: %s", err)
 	}
 
 	months = getMonthsBetween(periodEndDate, periodStartDate)
@@ -103,12 +114,14 @@ func getAnalytics(storageRepo storagerepo.StorageRepository, cacheRepo cacherepo
 
 	formedMPP, err := formMPP(storageRepo, months, userID, fileID, periodStartDate, periodEndDate)
 	if err != nil {
-		return months, mrr, err
+		return months, mrr, fmt.Errorf("failed to form mpp, error is: %s", err)
 	}
 	mrr = convertRawMRR(calculateTotalMRR(formedMPP))
-	_, err = cacheRepo.SetMRR(userFilePeriod, mrr)
+	if _, err = cacheRepo.SetMRR(userFilePeriod, mrr); err != nil {
+		return months, mrr, fmt.Errorf("failed to set mrr to cache, error is: %s", err)
+	}
 
-	return months, mrr, err
+	return months, mrr, nil
 }
 
 func convertRawMRR(rawMRR []domain.MRR) domain.TotalMRR {
@@ -182,17 +195,17 @@ func formMPP(storageRepo storagerepo.StorageRepository, months []string, userID,
 
 	invoices, err := storageRepo.GetInvoicesByPeriod(userID, fileID, periodStart, fixedPeriodEnd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get invoices from storage, error is: %s", err)
 	}
 
 	if len(invoices) == 0 {
-		return nil, errors.New("No data found for given period")
+		return nil, errors.New("no data found for given period")
 	}
 
 	mpp := formMPPEntries(invoices, len(months), periodStart)
 	fixedMPP := fixMPP(mpp)
 
-	return fixedMPP, err
+	return fixedMPP, nil
 }
 
 func fixMPP(mpp []domain.MPP) []domain.MPP {

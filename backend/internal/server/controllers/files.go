@@ -14,6 +14,7 @@ import (
 	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
+	log "github.com/sirupsen/logrus"
 )
 
 type Invoice struct {
@@ -37,6 +38,7 @@ type Invoice struct {
 func LoadFiles(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
+		log.Errorf("failed to get email from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
@@ -44,6 +46,7 @@ func LoadFiles(c *gin.Context) {
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
+		log.Errorf("failed to get user_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get user_repo",
 		})
@@ -52,6 +55,7 @@ func LoadFiles(c *gin.Context) {
 
 	files, err := loadFiles(userRepo, email)
 	if err != nil {
+		log.Errorf("failed to load files for email %s, error is: %s", email, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to fetch user files",
 		})
@@ -79,6 +83,7 @@ func LoadFiles(c *gin.Context) {
 func DeleteFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
+		log.Errorf("failed to get email from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
@@ -86,6 +91,7 @@ func DeleteFile(c *gin.Context) {
 	}
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
+		log.Errorf("failed to get user_id from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
@@ -93,6 +99,7 @@ func DeleteFile(c *gin.Context) {
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
+		log.Errorf("failed to get user_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get user_repo",
 		})
@@ -100,6 +107,7 @@ func DeleteFile(c *gin.Context) {
 	}
 	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
 	if !ok {
+		log.Errorf("failed to get storage_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get storage_repo",
 		})
@@ -108,8 +116,8 @@ func DeleteFile(c *gin.Context) {
 
 	filename := c.Param("filename")
 
-	err := deleteFile(userRepo, storageRepo, email, userID, filename)
-	if err != nil {
+	if err := deleteFile(userRepo, storageRepo, email, userID, filename); err != nil {
+		log.Errorf("failed to delete file %s for email %s, user_id %s, error is: %s", filename, email, userID)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to delete file",
 		})
@@ -136,6 +144,7 @@ func DeleteFile(c *gin.Context) {
 func SaveFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
+		log.Errorf("failed to get email from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
@@ -143,6 +152,7 @@ func SaveFile(c *gin.Context) {
 	}
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
+		log.Errorf("failed to get user_id from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to determine logged in user",
 		})
@@ -150,6 +160,7 @@ func SaveFile(c *gin.Context) {
 	}
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
+		log.Errorf("failed to get user_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get user_repo",
 		})
@@ -157,6 +168,7 @@ func SaveFile(c *gin.Context) {
 	}
 	storageRepo, ok := c.MustGet("storage_repo").(storagerepo.StorageRepository)
 	if !ok {
+		log.Errorf("failed to get storage_repo from gin.Context")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to get storage_repo",
 		})
@@ -165,6 +177,7 @@ func SaveFile(c *gin.Context) {
 
 	file, err := c.FormFile("file")
 	if err != nil {
+		log.Errorf("failed to get file from formFile")
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "No file is received",
 		})
@@ -173,6 +186,7 @@ func SaveFile(c *gin.Context) {
 
 	fext := filepath.Ext(file.Filename)
 	if fext != ".csv" {
+		log.Errorf("non csv files are not allowed, given %s", fext)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Wrong file format. Please provide CSV file",
 		})
@@ -184,19 +198,20 @@ func SaveFile(c *gin.Context) {
 	filepth := fmt.Sprintf("%v/%v", dir, filename)
 
 	if _, err = os.Stat(dir); os.IsNotExist(err) {
+		log.Infof("%s isn't exist, creating", dir)
 		os.Mkdir(dir, 0777)
 	}
 
-	err = c.SaveUploadedFile(file, filepth)
-	if err != nil {
+	if err = c.SaveUploadedFile(file, filepth); err != nil {
+		log.Errorf("unable to save file %s, path %s, error is: %s", file, filepth, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to save the file",
 		})
 		return
 	}
 
-	err = updateFiles(userRepo, email, userID, filename)
-	if err != nil {
+	if err = updateFiles(userRepo, email, userID, filename); err != nil {
+		log.Errorf("unable to update files for email %s, user_id %s, error is: %s", email, userID, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Unable to update user in db",
 		})
@@ -205,6 +220,7 @@ func SaveFile(c *gin.Context) {
 
 	csvFile, err := os.Open(filepth)
 	if err != nil {
+		log.Errorf("unable to open file at %s, error is: %s", filepth, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to find data with given id",
 		})
@@ -214,16 +230,16 @@ func SaveFile(c *gin.Context) {
 
 	var invoices []*Invoice
 
-	err = gocsv.UnmarshalFile(csvFile, &invoices)
-	if err != nil {
+	if err = gocsv.UnmarshalFile(csvFile, &invoices); err != nil {
+		log.Errorf("unable to unmarshal %s, error is: %s", csvFile, err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to parse given CSV file",
 		})
 		return
 	}
 
-	err = uploadFile(storageRepo, userID, filename, invoices)
-	if err != nil {
+	if err = uploadFile(storageRepo, userID, filename, invoices); err != nil {
+		log.Errorf("unable to upload invoices for email %s, user_id %s, error is: %s", email, userID, err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to upload data to database",
 		})
@@ -238,19 +254,21 @@ func SaveFile(c *gin.Context) {
 
 func loadFiles(userRepo userrepo.UserRepository, email string) ([]domain.File, error) {
 	user, err := userRepo.GetUser(email)
+	if err != nil {
+		return []domain.File{}, fmt.Errorf("failed to get user, error is: %s", err)
+	}
 
-	return user.Files, err
+	return user.Files, nil
 }
 
 func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.StorageRepository, email, userID, filename string) error {
-	err := os.Remove(fmt.Sprintf("static/%v/%v", userID, filename))
-	if err != nil {
-		return err
+	if err := os.Remove(fmt.Sprintf("static/%v/%v", userID, filename)); err != nil {
+		return fmt.Errorf("failed to remove local file, error is: %s", err)
 	}
 
 	user, err := userRepo.GetUser(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user, error is: %s", err)
 	}
 
 	newFiles := make([]domain.File, 0)
@@ -261,24 +279,31 @@ func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.Storag
 	}
 
 	user.Files = newFiles
-	err = userRepo.UpdateUser(userID, user)
-	if err != nil {
-		return err
+	if err = userRepo.UpdateUser(userID, user); err != nil {
+		return fmt.Errorf("failed to update user, error is: %s", err)
 	}
 
-	return storageRepo.DeleteInvoices(userID, filename)
+	if err = storageRepo.DeleteInvoices(userID, filename); err != nil {
+		return fmt.Errorf("failed to delete ivoices from db, error is: %s", err)
+	}
+
+	return nil
 }
 
 func updateFiles(userRepo userrepo.UserRepository, email, userID, filename string) error {
 	user, err := userRepo.GetUser(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user, error is: %s", err)
 	}
 
 	uploadedAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	user.Files = append(user.Files, domain.File{Name: filename, UploadedAt: uploadedAt})
 
-	return userRepo.UpdateUser(userID, user)
+	if err = userRepo.UpdateUser(userID, user); err != nil {
+		return fmt.Errorf("failed to update user, error is: %s", err)
+	}
+
+	return nil
 }
 
 func uploadFile(storageRepo storagerepo.StorageRepository, userID, fileID string, invoices []*Invoice) error {
@@ -297,7 +322,9 @@ func uploadFile(storageRepo storagerepo.StorageRepository, userID, fileID string
 		mappedInvoices = append(mappedInvoices, mappedInvoice)
 	}
 
-	_, err := storageRepo.AddInvoices(mappedInvoices)
+	if _, err := storageRepo.AddInvoices(mappedInvoices); err != nil {
+		return fmt.Errorf("failed upload invoices to db, error is: %s", err)
+	}
 
-	return err
+	return nil
 }

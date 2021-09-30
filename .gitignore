@@ -8,3 +8,6 @@ data/init
 
 # OSX files
 .DS_Store
+
+# Logs
+logs.txt

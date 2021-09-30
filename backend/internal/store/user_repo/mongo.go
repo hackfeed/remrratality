@@ -1,6 +1,7 @@
 package userrepo
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hackfeed/remrratality/backend/internal/db/user"
@@ -27,7 +28,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 
 	hashedPassword, err := internalUser.HashPassword()
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("failed to hash password for email %s, error is: %s", email, err)
 	}
 	createdAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	updatedAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -47,7 +48,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 
 	_, err = mr.userClient.Create(mappedUser)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("failed to insert user with email %s, error is: %s", email, err)
 	}
 
 	internalUser.Password = mappedUser.Password
@@ -64,7 +65,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
 	user, err := mr.userClient.Read("email", email)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("failed to get user with email %s, error is: %s", email, err)
 	}
 
 	mappedFiles := convertFilesToDomain(user.Files)

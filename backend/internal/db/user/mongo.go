@@ -71,13 +71,8 @@ func (mc *MongoClient) Create(user User) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	_, err := mc.
-		client.
-		Database("mrr").
-		Collection("user").
-		InsertOne(ctx, user)
-	if err != nil {
-		return User{}, err
+	if _, err := mc.client.Database("mrr").Collection("user").InsertOne(ctx, user); err != nil {
+		return User{}, fmt.Errorf("failed to run mongo insertOne method, error is: %s", err)
 	}
 
 	return user, nil
@@ -89,14 +84,11 @@ func (mc *MongoClient) Read(key string, value interface{}) (User, error) {
 
 	var user User
 
-	err := mc.
-		client.
-		Database("mrr").
-		Collection("user").
-		FindOne(ctx, bson.M{key: value}).
-		Decode(&user)
+	if err := mc.client.Database("mrr").Collection("user").FindOne(ctx, bson.M{key: value}).Decode(&user); err != nil {
+		return User{}, fmt.Errorf("failed to run mongo decode method, error is: %s", err)
+	}
 
-	return user, err
+	return user, nil
 }
 
 func (mc *MongoClient) Update(obj interface{}, key string, value interface{}) error {
@@ -108,7 +100,7 @@ func (mc *MongoClient) Update(obj interface{}, key string, value interface{}) er
 		Upsert: &upsert,
 	}
 
-	_, err := mc.
+	if _, err := mc.
 		client.
 		Database("mrr").
 		Collection("user").
@@ -117,7 +109,9 @@ func (mc *MongoClient) Update(obj interface{}, key string, value interface{}) er
 			bson.M{key: value},
 			bson.D{{"$set", obj}},
 			&opt,
-		)
+		); err != nil {
+		return fmt.Errorf("failed to run mongo updateOne method, error is: %s", err)
+	}
 
-	return err
+	return nil
 }

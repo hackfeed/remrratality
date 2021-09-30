@@ -2,6 +2,7 @@ package storagerepo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/hackfeed/remrratality/backend/internal/db/storage"
@@ -36,7 +37,7 @@ func (pr *postgresRepo) AddInvoices(invoices []domain.Invoice) ([]domain.Invoice
 
 	err := pr.storageClient.Create(context.Background(), "invoices", storage.AllFields, mappedInvoices)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to insert invoices, error is: %s", err)
 	}
 
 	return invoices, nil
@@ -53,7 +54,10 @@ func (pr *postgresRepo) GetInvoicesByPeriod(userID, fileID string, periodStart, 
 		periodEnd,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(
+			"failed to read invoices by period from %v to %v with user_id %s, file_id %s, error is: %s",
+			periodStart, periodEnd, userID, fileID, err,
+		)
 	}
 
 	mappedInvoices := make([]domain.Invoice, 0)

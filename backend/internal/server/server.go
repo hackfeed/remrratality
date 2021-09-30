@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log"
 	"os"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 	cacherepo "github.com/hackfeed/remrratality/backend/internal/store/cache_repo"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
+	log "github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -38,7 +38,7 @@ func init() {
 		DB:       os.Getenv("MONGO_DB"),
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to create mongo client, error is: %s", err)
 	}
 	userRepo = userrepo.NewMongoRepo(*userClient)
 
@@ -50,7 +50,7 @@ func init() {
 		DB:       os.Getenv("POSTGRES_DB"),
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to create postgres client, error is: %s", err)
 	}
 	storageRepo = storagerepo.NewPostgresRepo(*storageClient)
 
@@ -61,7 +61,7 @@ func init() {
 		DB:       os.Getenv("REDIS_DB"),
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to create redis client, error is: %s", err)
 	}
 	cacheRepo = cacherepo.NewRedisRepo(*cacheClient, 1*time.Hour)
 }
@@ -71,7 +71,7 @@ func SetupServer() *gin.Engine {
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AllowHeaders = []string{"token"}
+	config.AllowHeaders = []string{"token", "Origin", "X-Requested-With", "Content-Type", "Accept"}
 	config.AllowMethods = []string{"GET", "POST", "DELETE"}
 	r.Use(cors.New(config))
 
