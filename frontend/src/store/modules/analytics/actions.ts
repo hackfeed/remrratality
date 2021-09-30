@@ -5,7 +5,7 @@ import { AnalyticsState, RootState } from "@/interfaces/state";
 
 export default {
   async uploadData(context: ActionContext<AnalyticsState, RootState>, data: string): Promise<void> {
-    const response = await fetch("http://localhost:8081/api/v1/files/upload", {
+    const response = await fetch("/api/v1/files/upload", {
       method: "POST",
       body: data,
       headers: {
@@ -25,7 +25,7 @@ export default {
     context: ActionContext<AnalyticsState, RootState>,
     data: Record<string, unknown>
   ): Promise<void> {
-    const response = await fetch("http://localhost:8081/api/v1/analytics/mrr", {
+    const response = await fetch("/api/v1/analytics/mrr", {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
@@ -84,7 +84,7 @@ export default {
     context.commit("setData", curData);
   },
   async loadFiles(context: ActionContext<AnalyticsState, RootState>): Promise<void> {
-    const response = await fetch("http://localhost:8081/api/v1/files/load", {
+    const response = await fetch("/api/v1/files/load", {
       headers: {
         token: localStorage.getItem("token")!,
       },
@@ -99,7 +99,7 @@ export default {
     context.commit("setFiles", responseData.files);
   },
   async deleteFile(context: ActionContext<AnalyticsState, RootState>, data: string): Promise<void> {
-    const response = await fetch(`http://localhost:8081/api/v1/files/delete/${data}`, {
+    const response = await fetch(`/api/v1/files/delete/${data}`, {
       method: "DELETE",
       headers: {
         token: localStorage.getItem("token")!,
