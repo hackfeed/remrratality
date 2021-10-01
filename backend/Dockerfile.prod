@@ -1,0 +1,19 @@
+FROM golang:1.17-alpine AS build
+
+WORKDIR /app
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
+
+RUN go build -o ./build/backend ./cmd/backend/main.go
+
+FROM alpine:3.14
+WORKDIR /app
+COPY --from=build /app/build/backend .
+RUN mkdir static
+EXPOSE 8080
+CMD ["./backend"]

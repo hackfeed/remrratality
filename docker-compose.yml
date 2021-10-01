@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   redis:
-    image: redis:latest
+    image: redis:6.2
     container_name: remrratality-redis
     env_file:
       - .env
@@ -11,7 +11,7 @@ services:
       - ${REDIS_PORT}:6379
 
   postgres:
-    image: postgres:latest
+    image: postgres:14.0
     container_name: remrratality-postgres
     env_file:
       - .env
@@ -22,7 +22,7 @@ services:
       - ${POSTGRES_PORT}:5432
 
   mongo:
-    image: mongo:latest
+    image: mongo:5.0
     container_name: remrratality-mongo
     env_file:
       - .env
@@ -40,21 +40,11 @@ services:
     ports:
       - 8000:80
 
-  nginx:
-    image: byjg/nginx-extras:latest
-    container_name: remrratality-nginx
-    env_file:
-      - .env
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./frontend/dist:/usr/share/nginx/html
-    ports:
-      - 8082:80
-
-  frontend:
+  frontend_dev:
     build:
       context: ./frontend
-    container_name: mrratality-frontend
+      dockerfile: Dockerfile.dev
+    container_name: remrratality-frontend-dev
     command: npm run serve
     volumes:
       - ./frontend:/app
@@ -62,10 +52,19 @@ services:
     ports:
       - 8080:8080
 
-  backend:
+  frontend_prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: remrratality-frontend-prod
+    ports:
+      - 8082:80
+
+  backend_dev:
     build:
       context: ./backend
-    container_name: mrratality-backend
+      dockerfile: Dockerfile.dev
+    container_name: remrratality-backend-dev
     command: go run cmd/backend/main.go
     env_file:
       - .env.backend
@@ -77,4 +76,19 @@ services:
       - redis
       - postgres
       - mongo
-      - nginx
+      - adminer
+
+  backend_prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: remrratality-backend-prod
+    env_file:
+      - .env.backend
+    ports:
+      - 8081:8080
+    depends_on:
+      - redis
+      - postgres
+      - mongo
+      - adminer

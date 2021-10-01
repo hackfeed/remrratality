@@ -8,4 +8,7 @@ module.exports = {
       },
     },
   },
+  devServer: {
+    proxy: "http://backend_dev:8080",
+  },
 };
