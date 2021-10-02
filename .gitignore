@@ -11,3 +11,6 @@ data/init
 
 # Logs
 logs.txt
+
+# Certificates
+cert

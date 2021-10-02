@@ -113,10 +113,10 @@ definitions:
     - email
     - password
     type: object
-host: localhost:8081
+host: weblabs.com:8003
 info:
   contact:
-    email: hackfeed@vk.com
+    email: hackfeed@yandex.ru
     name: Sergey "hackfeed" Kononenko
     url: https://hackfeed.github.io
   description: API for getting MRR analytics of your app's money flow.

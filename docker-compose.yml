@@ -40,6 +40,33 @@ services:
     ports:
       - 8000:80
 
+  influxdb:
+    image: influxdb:1.8
+    container_name: remrratality-influxdb
+    env_file:
+      - .env
+    ports:
+      - ${INFLUXDB_PORT}:8086
+
+  grafana:
+    image: grafana/grafana:8.1.5
+    container_name: remrratality-grafana
+    env_file:
+      - .env
+    volumes:
+      - ./testing/grafana:/etc/grafana/provisioning/
+    ports:
+      - ${GF_PORT}:3000
+
+  k6:
+    image: loadimpact/k6:0.34.1
+    container_name: remrratality-k6
+    env_file:
+      - .env
+    volumes:
+      - ./testing/k6/scripts:/scripts
+    network_mode: host
+
   frontend_dev:
     build:
       context: ./frontend
@@ -50,7 +77,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - 8080:8080
+      - 8001:8080
 
   frontend_prod:
     build:
@@ -58,7 +85,8 @@ services:
       dockerfile: Dockerfile.prod
     container_name: remrratality-frontend-prod
     ports:
-      - 8082:80
+      - 8002:80
+      - 8003:443
 
   backend_dev:
     build:
@@ -71,22 +99,52 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - 8081:8080
+      - 8004:8080
     depends_on:
       - redis
       - postgres
       - mongo
       - adminer
 
-  backend_prod:
+  backend_prod1:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: remrratality-backend-prod
+    container_name: remrratality-backend-prod1
     env_file:
       - .env.backend
     ports:
-      - 8081:8080
+      - 8005:8080
+    depends_on:
+      - redis
+      - postgres
+      - mongo
+      - adminer
+
+  backend_prod2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: remrratality-backend-prod2
+    env_file:
+      - .env.backend
+    ports:
+      - 8006:8080
+    depends_on:
+      - redis
+      - postgres
+      - mongo
+      - adminer
+
+  backend_prod3:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: remrratality-backend-prod3
+    env_file:
+      - .env.backend
+    ports:
+      - 8007:8080
     depends_on:
       - redis
       - postgres

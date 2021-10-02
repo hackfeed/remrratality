@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	docs "github.com/hackfeed/remrratality/backend/docs"
+	_ "github.com/hackfeed/remrratality/backend/docs"
 	"github.com/hackfeed/remrratality/backend/internal/db/cache"
 	"github.com/hackfeed/remrratality/backend/internal/db/storage"
 	"github.com/hackfeed/remrratality/backend/internal/db/user"
@@ -79,7 +79,6 @@ func SetupServer() *gin.Engine {
 	r.Use(middlewares.StorageRepo(storageRepo))
 	r.Use(middlewares.CacheRepo(cacheRepo))
 
-	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := r.Group("/api/v1")
 	{
 		auth := v1.Group("auth")

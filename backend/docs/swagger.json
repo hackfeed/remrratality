@@ -6,7 +6,7 @@
         "contact": {
             "name": "Sergey \"hackfeed\" Kononenko",
             "url": "https://hackfeed.github.io",
-            "email": "hackfeed@vk.com"
+            "email": "hackfeed@yandex.ru"
         },
         "license": {
             "name": "GPL-3.0 License",
@@ -14,7 +14,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8081",
+    "host": "weblabs.com:8003",
     "basePath": "/api/v1",
     "paths": {
         "/analytics/mrr": {

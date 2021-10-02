@@ -13,12 +13,12 @@ import (
 
 // @contact.name Sergey "hackfeed" Kononenko
 // @contact.url https://hackfeed.github.io
-// @contact.email hackfeed@vk.com
+// @contact.email hackfeed@yandex.ru
 
 // @license.name GPL-3.0 License
 // @license.url http://www.gnu.org/licenses/gpl-3.0.html
 
-// @host localhost:8081
+// @host weblabs.com:8003
 // @BasePath /api/v1
 
 // @securityDefinitions.apikey ApiKeyAuth

@@ -117,7 +117,7 @@ func DeleteFile(c *gin.Context) {
 	filename := c.Param("filename")
 
 	if err := deleteFile(userRepo, storageRepo, email, userID, filename); err != nil {
-		log.Errorf("failed to delete file %s for email %s, user_id %s, error is: %s", filename, email, userID)
+		log.Errorf("failed to delete file %s for email %s, user_id %s, error is: %s", filename, email, userID, err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to delete file",
 		})

@@ -20,7 +20,7 @@ var doc = `{
         "contact": {
             "name": "Sergey \"hackfeed\" Kononenko",
             "url": "https://hackfeed.github.io",
-            "email": "hackfeed@vk.com"
+            "email": "hackfeed@yandex.ru"
         },
         "license": {
             "name": "GPL-3.0 License",
@@ -498,7 +498,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "localhost:8081",
+	Host:        "weblabs.com:8003",
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "remrratality API",
