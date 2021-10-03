@@ -23,14 +23,14 @@ export const options = {
     getAnalytics: Object.assign(
       {
         exec: "getAnalytics",
-        env: { URL: "https://weblabs.com:8003/api/v1/analytics/mrr" },
+        env: { URL: "https://remrratality.com:8003/api/v1/analytics/mrr" },
       },
       baseScenario
     ),
     getFiles: Object.assign(
       {
         exec: "getFiles",
-        env: { URL: "https://weblabs.com:8003/api/v1/files/load" },
+        env: { URL: "https://remrratality.com:8003/api/v1/files/load" },
         startTime: "1m",
       },
       baseScenario

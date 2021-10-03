@@ -18,7 +18,7 @@ import (
 // @license.name GPL-3.0 License
 // @license.url http://www.gnu.org/licenses/gpl-3.0.html
 
-// @host weblabs.com:8003
+// @host remrratality.com:8003
 // @BasePath /api/v1
 
 // @securityDefinitions.apikey ApiKeyAuth

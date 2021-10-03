@@ -113,7 +113,7 @@ definitions:
     - email
     - password
     type: object
-host: weblabs.com:8003
+host: remrratality.com:8003
 info:
   contact:
     email: hackfeed@yandex.ru

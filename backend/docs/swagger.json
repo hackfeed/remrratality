@@ -14,7 +14,7 @@
         },
         "version": "1.0"
     },
-    "host": "weblabs.com:8003",
+    "host": "remrratality.com:8003",
     "basePath": "/api/v1",
     "paths": {
         "/analytics/mrr": {
