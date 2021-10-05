@@ -66,15 +66,4 @@ a {
     color: $color-text-secondary;
   }
 }
-
-.outline {
-  background-color: transparent;
-  border-color: $color-primary-dark;
-  color: $color-primary-dark;
-  &:hover,
-  &:active {
-    background-color: $color-primary-light;
-    color: $color-text-secondary;
-  }
-}
 </style>

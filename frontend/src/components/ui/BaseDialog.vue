@@ -71,6 +71,7 @@ dialog {
   overflow: hidden;
   background-color: $color-neutral-primary;
 }
+
 header {
   background-color: $color-primary;
   color: $color-text-secondary;
