@@ -58,6 +58,10 @@ services:
     ports:
       - ${GF_PORT}:3000
 
+  loki:
+    image: grafana/loki:1.4.1
+    container_name: remrratality-loki
+
   k6:
     image: loadimpact/k6:0.34.1
     container_name: remrratality-k6
