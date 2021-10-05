@@ -8,6 +8,8 @@
 
 [Результаты нагрузочного тестирования](LOADTEST.md)
 
+[Макет пользовательского приложения в Figma](https://www.figma.com/file/NnUDdhQ0q2RxURzjjXmPvT/remrratality)
+
 ## Roadmap
 
 |Задача|Статус|
