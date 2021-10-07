@@ -10,9 +10,9 @@ export default {
     payload: Record<string, unknown>
   ): Promise<void> {
     const mode = payload.mode;
-    let url = "/api/v1/auth/signup";
+    let url = "/api/v1/signup";
     if (mode === "login") {
-      url = "/api/v1/auth/login";
+      url = "/api/v1/login";
     }
     const response = await fetch(url, {
       method: "POST",

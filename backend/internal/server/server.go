@@ -81,21 +81,21 @@ func SetupServer() *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 	{
-		auth := v1.Group("auth")
-		{
-			auth.POST("/signup", controllers.SignUp)
-			auth.POST("/login", controllers.Login)
-		}
+		v1.POST("/signup", controllers.SignUp)
+		v1.POST("/login", controllers.Login)
+
 		files := v1.Group("/files", middlewares.Auth())
 		{
-			files.GET("/load", controllers.LoadFiles)
-			files.POST("/upload", controllers.SaveFile)
-			files.DELETE("/delete/:filename", controllers.DeleteFile)
+			files.GET("", controllers.LoadFiles)
+			files.POST("", controllers.SaveFile)
+			files.DELETE(":filename", controllers.DeleteFile)
 		}
-		analytics := v1.Group("analytics", middlewares.Auth())
+
+		analytics := v1.Group("/analytics", middlewares.Auth())
 		{
 			analytics.POST("/mrr", controllers.GetAnalytics)
 		}
+
 		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 

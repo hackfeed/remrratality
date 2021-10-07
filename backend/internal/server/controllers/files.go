@@ -32,9 +32,10 @@ type Invoice struct {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} models.ResponseSuccessLoadFiles
+// @Failure 401 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
-// @Router /files/load [get]
+// @Router /files [get]
 func LoadFiles(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
@@ -76,10 +77,11 @@ func LoadFiles(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} models.Response
 // @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
 // @Param filename path string true "File to delete"
-// @Router /files/delete/{filename} [delete]
+// @Router /files/{filename} [delete]
 func DeleteFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
@@ -137,10 +139,11 @@ func DeleteFile(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} models.ResponseSuccessSaveFile
 // @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
 // @Param file formData file true "File to upload"
-// @Router /files/upload [post]
+// @Router /files [post]
 func SaveFile(c *gin.Context) {
 	email, ok := c.MustGet("email").(string)
 	if !ok {
@@ -246,6 +249,14 @@ func SaveFile(c *gin.Context) {
 		return
 	}
 
+	if err := os.Remove(fmt.Sprintf("static/%v/%v", userID, filename)); err != nil {
+		log.Errorf("failed to remove local file, error is: %s", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
+			Message: "Failed to remove uploaded file after processing",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, models.ResponseSuccessSaveFile{
 		Message:  "File is uploaded",
 		Filename: filename,
@@ -262,10 +273,6 @@ func loadFiles(userRepo userrepo.UserRepository, email string) ([]domain.File, e
 }
 
 func deleteFile(userRepo userrepo.UserRepository, storageRepo storagerepo.StorageRepository, email, userID, filename string) error {
-	if err := os.Remove(fmt.Sprintf("static/%v/%v", userID, filename)); err != nil {
-		return fmt.Errorf("failed to remove local file, error is: %s", err)
-	}
-
 	user, err := userRepo.GetUser(email)
 	if err != nil {
 		return fmt.Errorf("failed to get user, error is: %s", err)

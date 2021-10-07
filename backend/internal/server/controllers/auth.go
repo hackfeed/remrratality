@@ -12,14 +12,14 @@ import (
 // SignUp godoc
 // @Summary Signing user up
 // @Description Signing user up by adding him to the database
-// @Tags auth
+// @Tags signup
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} models.ResponseSuccessAuth
 // @Failure 400 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Param request body models.User true "User's email and password"
-// @Router /auth/signup [post]
+// @Router /signup [post]
 func SignUp(c *gin.Context) {
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {
@@ -78,14 +78,14 @@ func SignUp(c *gin.Context) {
 // Login godoc
 // @Summary Logging user in
 // @Description Logging user in by retrieving his data from the database
-// @Tags auth
+// @Tags login
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} models.ResponseSuccessAuth
 // @Failure 400 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Param request body models.User true "User's email and password"
-// @Router /auth/login [post]
+// @Router /login [post]
 func Login(c *gin.Context) {
 	userRepo, ok := c.MustGet("user_repo").(userrepo.UserRepository)
 	if !ok {

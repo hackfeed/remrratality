@@ -10,9 +10,8 @@ const baseScenario = {
   preAllocatedVUs: 100,
   maxVUs: 300,
 };
-const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFbWFpbCI6InRlc3RAdGVzdC5jb20iLCJVc2VySUQiOiI2MTU4YjAzYmQ4Zjc3OTNlMzJjYjQ2ODQiLCJleHAiOjE2MzMyMTQyODZ9.Mr43-hCIKnWS4NmrgWWyqlSDm9aDe11kKcEHyvToYhw";
-const filename = "e12a8481-0c2a-4b11-8fad-d574dc41c774.csv";
+const token = "";
+const filename = "";
 const period_start = "2019-01-01";
 const period_end = "2021-01-01";
 
@@ -23,14 +22,14 @@ export const options = {
     getAnalytics: Object.assign(
       {
         exec: "getAnalytics",
-        env: { URL: "https://remrratality.com:8003/api/v1/analytics/mrr" },
+        env: { URL: "https://remrratality.com:8003/api/v1/mrr" },
       },
       baseScenario
     ),
     getFiles: Object.assign(
       {
         exec: "getFiles",
-        env: { URL: "https://remrratality.com:8003/api/v1/files/load" },
+        env: { URL: "https://remrratality.com:8003/api/v1/files" },
         startTime: "1m",
       },
       baseScenario

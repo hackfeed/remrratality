@@ -24,7 +24,7 @@ func Auth() gin.HandlerFunc {
 		clientToken := c.Request.Header.Get("token")
 		if clientToken == "" {
 			log.Errorf("failed to get authorization header")
-			c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.Response{
 				Message: "No Authorization header provided",
 			})
 			return

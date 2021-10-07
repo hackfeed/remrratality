@@ -149,6 +149,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -158,7 +162,101 @@ paths:
       summary: Get MRR analytics data
       tags:
       - analytics
-  /auth/login:
+  /files:
+    get:
+      consumes:
+      - application/json
+      description: Loading files' names, uploaded by user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessLoadFiles'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Loading user's files
+      tags:
+      - files
+    post:
+      consumes:
+      - application/json
+      description: Saving file locally on the server and parsing its content to database
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccessSaveFile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Saving user's file
+      tags:
+      - files
+  /files/{filename}:
+    delete:
+      consumes:
+      - application/json
+      description: Deleting file and cleaning database
+      parameters:
+      - description: File to delete
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Deleting user's file
+      tags:
+      - files
+  /login:
     post:
       consumes:
       - application/json
@@ -187,8 +285,8 @@ paths:
             $ref: '#/definitions/models.Response'
       summary: Logging user in
       tags:
-      - auth
-  /auth/signup:
+      - login
+  /signup:
     post:
       consumes:
       - application/json
@@ -217,90 +315,7 @@ paths:
             $ref: '#/definitions/models.Response'
       summary: Signing user up
       tags:
-      - auth
-  /files/delete/{filename}:
-    delete:
-      consumes:
-      - application/json
-      description: Deleting file and cleaning database
-      parameters:
-      - description: File to delete
-        in: path
-        name: filename
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Deleting user's file
-      tags:
-      - files
-  /files/load:
-    get:
-      consumes:
-      - application/json
-      description: Loading files' names, uploaded by user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseSuccessLoadFiles'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Loading user's files
-      tags:
-      - files
-  /files/upload:
-    post:
-      consumes:
-      - application/json
-      description: Saving file locally on the server and parsing its content to database
-      parameters:
-      - description: File to upload
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseSuccessSaveFile'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Saving user's file
-      tags:
-      - files
+      - signup
 securityDefinitions:
   ApiKeyAuth:
     in: header

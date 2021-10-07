@@ -73,6 +73,12 @@ var doc = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -82,9 +88,14 @@ var doc = `{
                 }
             }
         },
-        "/auth/login": {
-            "post": {
-                "description": "Logging user in by retrieving his data from the database",
+        "/files": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Loading files' names, uploaded by user",
                 "consumes": [
                     "application/json"
                 ],
@@ -92,25 +103,61 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "files"
                 ],
-                "summary": "Logging user in",
+                "summary": "Loading user's files",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccessLoadFiles"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Saving file locally on the server and parsing its content to database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Saving user's file",
                 "parameters": [
                     {
-                        "description": "User's email and password",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseSuccessAuth"
+                            "$ref": "#/definitions/models.ResponseSuccessSaveFile"
                         }
                     },
                     "400": {
@@ -119,48 +166,8 @@ var doc = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/signup": {
-            "post": {
-                "description": "Signing user up by adding him to the database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Signing user up",
-                "parameters": [
-                    {
-                        "description": "User's email and password",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseSuccessAuth"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -174,7 +181,7 @@ var doc = `{
                 }
             }
         },
-        "/files/delete/{filename}": {
+        "/files/{filename}": {
             "delete": {
                 "security": [
                     {
@@ -214,38 +221,10 @@ var doc = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/files/load": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Loading files' names, uploaded by user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "files"
-                ],
-                "summary": "Loading user's files",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseSuccessLoadFiles"
                         }
                     },
                     "500": {
@@ -257,14 +236,9 @@ var doc = `{
                 }
             }
         },
-        "/files/upload": {
+        "/login": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Saving file locally on the server and parsing its content to database",
+                "description": "Logging user in by retrieving his data from the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -272,23 +246,71 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "files"
+                    "login"
                 ],
-                "summary": "Saving user's file",
+                "summary": "Logging user in",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "File to upload",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
+                        "description": "User's email and password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseSuccessSaveFile"
+                            "$ref": "#/definitions/models.ResponseSuccessAuth"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Signing user up by adding him to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "signup"
+                ],
+                "summary": "Signing user up",
+                "parameters": [
+                    {
+                        "description": "User's email and password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccessAuth"
                         }
                     },
                     "400": {

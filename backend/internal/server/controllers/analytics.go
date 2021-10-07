@@ -26,6 +26,7 @@ var (
 // @Produce  json
 // @Success 200 {object} models.ResponseSuccessAnalytics
 // @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Security ApiKeyAuth
 // @Param request body models.Period true "Parameters for MRR analytics"
