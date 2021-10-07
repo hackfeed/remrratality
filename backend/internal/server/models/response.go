@@ -7,7 +7,7 @@ type ResponseSuccessLoadFiles struct {
 	Files   []domain.File `json:"files"`
 }
 
-type ResponseSuccessSaveFile struct {
+type ResponseSuccessSaveFileContent struct {
 	Message  string `json:"message" example:"File is uploaded"`
 	Filename string `json:"filename" example:"filename.csv"`
 }

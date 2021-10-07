@@ -21,7 +21,7 @@ export const options = {
   scenarios: {
     getAnalytics: Object.assign(
       {
-        exec: "getAnalytics",
+        exec: "createAnalytics",
         env: { URL: "https://remrratality.com:8003/api/v1/mrr" },
       },
       baseScenario
@@ -37,7 +37,7 @@ export const options = {
   },
 };
 
-export const getAnalytics = () => {
+export const createAnalytics = () => {
   const url = __ENV.URL;
   const params = {
     headers: {

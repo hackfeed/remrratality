@@ -38,7 +38,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Getting MRR analytics data with all components for given period",
+                "description": "Creating MRR analytics data with all components for given period and returning it",
                 "consumes": [
                     "application/json"
                 ],
@@ -48,7 +48,7 @@ var doc = `{
                 "tags": [
                     "analytics"
                 ],
-                "summary": "Get MRR analytics data",
+                "summary": "Create and return MRR analytics data",
                 "parameters": [
                     {
                         "description": "Parameters for MRR analytics",
@@ -95,7 +95,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Loading files' names, uploaded by user",
+                "description": "Loading invoices files' names, uploaded by user",
                 "consumes": [
                     "application/json"
                 ],
@@ -105,7 +105,7 @@ var doc = `{
                 "tags": [
                     "files"
                 ],
-                "summary": "Loading user's files",
+                "summary": "Loading user's invoices files list",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -133,7 +133,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Saving file locally on the server and parsing its content to database",
+                "description": "Saving file locally, parsing its content to database and deleting it from the server",
                 "consumes": [
                     "application/json"
                 ],
@@ -143,7 +143,7 @@ var doc = `{
                 "tags": [
                     "files"
                 ],
-                "summary": "Saving user's file",
+                "summary": "Saving user's file's content",
                 "parameters": [
                     {
                         "type": "file",
@@ -157,7 +157,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseSuccessSaveFile"
+                            "$ref": "#/definitions/models.ResponseSuccessSaveFileContent"
                         }
                     },
                     "400": {
@@ -188,7 +188,7 @@ var doc = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Deleting file and cleaning database",
+                "description": "Deleting invoices linked to file from database",
                 "consumes": [
                     "application/json"
                 ],
@@ -198,11 +198,11 @@ var doc = `{
                 "tags": [
                     "files"
                 ],
-                "summary": "Deleting user's file",
+                "summary": "Deleting user's invoices file's content",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "File to delete",
+                        "description": "Invoice file to delete",
                         "name": "filename",
                         "in": "path",
                         "required": true
@@ -468,7 +468,7 @@ var doc = `{
                 }
             }
         },
-        "models.ResponseSuccessSaveFile": {
+        "models.ResponseSuccessSaveFileContent": {
             "type": "object",
             "properties": {
                 "filename": {

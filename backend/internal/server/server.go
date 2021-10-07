@@ -87,13 +87,13 @@ func SetupServer() *gin.Engine {
 		files := v1.Group("/files", middlewares.Auth())
 		{
 			files.GET("", controllers.LoadFiles)
-			files.POST("", controllers.SaveFile)
-			files.DELETE(":filename", controllers.DeleteFile)
+			files.POST("", controllers.SaveFileContent)
+			files.DELETE(":filename", controllers.DeleteFileContent)
 		}
 
 		analytics := v1.Group("/analytics", middlewares.Auth())
 		{
-			analytics.POST("/mrr", controllers.GetAnalytics)
+			analytics.POST("/mrr", controllers.CreateAnalytics)
 		}
 
 		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

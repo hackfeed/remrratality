@@ -18,9 +18,9 @@ var (
 	layout = "2006-01-02"
 )
 
-// GetAnalytics godoc
-// @Summary Get MRR analytics data
-// @Description Getting MRR analytics data with all components for given period
+// CreateAnalytics godoc
+// @Summary Create and return MRR analytics data
+// @Description Creating MRR analytics data with all components for given period and returning it
 // @Tags analytics
 // @Accept  json
 // @Produce  json
@@ -31,7 +31,7 @@ var (
 // @Security ApiKeyAuth
 // @Param request body models.Period true "Parameters for MRR analytics"
 // @Router /analytics/mrr [post]
-func GetAnalytics(c *gin.Context) {
+func CreateAnalytics(c *gin.Context) {
 	userID, ok := c.MustGet("user_id").(string)
 	if !ok {
 		log.Errorf("failed to get user_id from gin.Context")
@@ -67,7 +67,7 @@ func GetAnalytics(c *gin.Context) {
 		return
 	}
 
-	months, mrr, err := getAnalytics(storageRepo, cacheRepo, userID, req.Filename, req.PeriodStart, req.PeriodEnd)
+	months, mrr, err := createAnalytics(storageRepo, cacheRepo, userID, req.Filename, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
 		log.Errorf("failed to get MRR analytics, error is: %s", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
@@ -83,7 +83,7 @@ func GetAnalytics(c *gin.Context) {
 	})
 }
 
-func getAnalytics(storageRepo storagerepo.StorageRepository, cacheRepo cacherepo.CacheRepository, userID, fileID, periodStart, periodEnd string) ([]string, domain.TotalMRR, error) {
+func createAnalytics(storageRepo storagerepo.StorageRepository, cacheRepo cacherepo.CacheRepository, userID, fileID, periodStart, periodEnd string) ([]string, domain.TotalMRR, error) {
 	var (
 		mrr    domain.TotalMRR
 		months []string

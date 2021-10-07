@@ -92,7 +92,7 @@ definitions:
         example: Files are loaded
         type: string
     type: object
-  models.ResponseSuccessSaveFile:
+  models.ResponseSuccessSaveFileContent:
     properties:
       filename:
         example: filename.csv
@@ -130,7 +130,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Getting MRR analytics data with all components for given period
+      description: Creating MRR analytics data with all components for given period
+        and returning it
       parameters:
       - description: Parameters for MRR analytics
         in: body
@@ -159,14 +160,14 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: Get MRR analytics data
+      summary: Create and return MRR analytics data
       tags:
       - analytics
   /files:
     get:
       consumes:
       - application/json
-      description: Loading files' names, uploaded by user
+      description: Loading invoices files' names, uploaded by user
       produces:
       - application/json
       responses:
@@ -184,13 +185,14 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: Loading user's files
+      summary: Loading user's invoices files list
       tags:
       - files
     post:
       consumes:
       - application/json
-      description: Saving file locally on the server and parsing its content to database
+      description: Saving file locally, parsing its content to database and deleting
+        it from the server
       parameters:
       - description: File to upload
         in: formData
@@ -203,7 +205,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseSuccessSaveFile'
+            $ref: '#/definitions/models.ResponseSuccessSaveFileContent'
         "400":
           description: Bad Request
           schema:
@@ -218,16 +220,16 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: Saving user's file
+      summary: Saving user's file's content
       tags:
       - files
   /files/{filename}:
     delete:
       consumes:
       - application/json
-      description: Deleting file and cleaning database
+      description: Deleting invoices linked to file from database
       parameters:
-      - description: File to delete
+      - description: Invoice file to delete
         in: path
         name: filename
         required: true
@@ -253,7 +255,7 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: Deleting user's file
+      summary: Deleting user's invoices file's content
       tags:
       - files
   /login:
