@@ -1,5 +1,8 @@
 # remrratality
 
+[![test](https://github.com/hackfeed/remrratality/workflows/test/badge.svg?branch=master)](https://github.com/hackfeed/remrratality/actions)
+[![Coverage Status](https://coveralls.io/repos/github/hackfeed/remrratality/badge.svg)](https://coveralls.io/github/hackfeed/remrratality)
+
 Перерождение проекта [**mrratality**](https://github.com/hackfeed/mrratality) с улучшенной архитектурой и стеком.
 
 Данный проект будет использован для лабораторных работ по курсам "Тестирование и отладка ПО" и "Web-разработка".
