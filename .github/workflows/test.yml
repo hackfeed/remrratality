@@ -14,8 +14,10 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
-      - name: Run Go tests
+      - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Run tests
         working-directory: backend
         run: go test -v -coverprofile=profile.cov ./...
 
