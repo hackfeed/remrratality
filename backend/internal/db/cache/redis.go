@@ -11,7 +11,7 @@ import (
 )
 
 type RedisClient struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
 type Options struct {
@@ -33,10 +33,10 @@ func NewRedisClient(ctx context.Context, options *Options) (*RedisClient, error)
 	if redisClient == nil {
 		client, err := getRedisClient(ctx, options)
 		if err != nil {
-			return nil, fmt.Errorf("failed to initialize redis client, error is: %s", err)
+			return nil, fmt.Errorf("failed to initialize redis Client, error is: %s", err)
 		}
 		redisClient = &RedisClient{
-			client: client,
+			Client: client,
 		}
 		return redisClient, nil
 	}
@@ -54,7 +54,7 @@ func getRedisClient(ctx context.Context, options *Options) (*redis.Client, error
 	client := redis.NewClient(&opts)
 
 	if err := client.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("redis client with ttl %s failed to ping address %s, error is: %s",
+		return nil, fmt.Errorf("redis Client with ttl %s failed to ping address %s, error is: %s",
 			opts.IdleTimeout, opts.Addr, err)
 	}
 
@@ -62,9 +62,9 @@ func getRedisClient(ctx context.Context, options *Options) (*redis.Client, error
 }
 
 func (rc *RedisClient) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
-	return rc.client.Set(ctx, key, value, expiration).Err()
+	return rc.Client.Set(ctx, key, value, expiration).Err()
 }
 
 func (rc *RedisClient) Get(ctx context.Context, key string) ([]byte, error) {
-	return rc.client.Get(ctx, key).Bytes()
+	return rc.Client.Get(ctx, key).Bytes()
 }

@@ -218,7 +218,7 @@ func SaveFileContent(c *gin.Context) {
 	var invoices []*Invoice
 
 	if err = gocsv.UnmarshalFile(csvFile, &invoices); err != nil {
-		log.Errorf("unable to unmarshal %s, error is: %s", csvFile, err)
+		log.Errorf("unable to unmarshal %s, error is: %s", filename, err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to parse given CSV file",
 		})

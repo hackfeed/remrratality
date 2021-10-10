@@ -11,20 +11,20 @@ import (
 	"github.com/hackfeed/remrratality/backend/internal/domain"
 )
 
-type redisRepo struct {
-	ttl         time.Duration
-	cacheClient cache.RedisClient
+type RedisRepo struct {
+	TTL         time.Duration
+	CacheClient cache.RedisClient
 }
 
 func NewRedisRepo(cacheClient cache.RedisClient, ttl time.Duration) CacheRepository {
-	return &redisRepo{
-		ttl:         ttl,
-		cacheClient: cacheClient,
+	return &RedisRepo{
+		TTL:         ttl,
+		CacheClient: cacheClient,
 	}
 }
 
-func (rr *redisRepo) GetMRR(key string) (domain.TotalMRR, error) {
-	bytes, err := rr.cacheClient.Get(context.Background(), key)
+func (rr *RedisRepo) GetMRR(key string) (domain.TotalMRR, error) {
+	bytes, err := rr.CacheClient.Get(context.Background(), key)
 	if err == redis.Nil {
 		return domain.TotalMRR{}, nil
 	}
@@ -41,13 +41,13 @@ func (rr *redisRepo) GetMRR(key string) (domain.TotalMRR, error) {
 	return mrr, nil
 }
 
-func (rr *redisRepo) SetMRR(key string, mrr domain.TotalMRR) (domain.TotalMRR, error) {
+func (rr *RedisRepo) SetMRR(key string, mrr domain.TotalMRR) (domain.TotalMRR, error) {
 	bytes, err := json.Marshal(mrr)
 	if err != nil {
 		return domain.TotalMRR{}, fmt.Errorf("failed to marshal by key %s, error is: %s", key, err)
 	}
 
-	if err := rr.cacheClient.Set(context.Background(), key, bytes, rr.ttl); err != nil {
+	if err := rr.CacheClient.Set(context.Background(), key, bytes, rr.TTL); err != nil {
 		return domain.TotalMRR{}, fmt.Errorf("failed to set mrr to cache by key %s, error is: %s", key, err)
 	}
 
