@@ -24,7 +24,8 @@ jobs:
       - name: Send coverage
         uses: shogo82148/actions-goveralls@v1.4.7
         with:
-          path-to-profile: backend/profile.cov
+          path-to-profile: profile.cov
+          working-directory: backend
           flag-name: Go-${{ matrix.go-version }}
           parallel: true
 
