@@ -86,14 +86,14 @@ func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
 
 func (mr *mongoRepo) UpdateUser(user_id string, user domain.User) error {
 	updatedUser := primitive.D{
-		bson.E{"user_id", user.UserID},
-		bson.E{"email", user.Email},
-		bson.E{"password", user.Password},
-		bson.E{"token", user.Token},
-		bson.E{"refresh_token", user.RefreshToken},
-		bson.E{"created_at", user.CreatedAt},
-		bson.E{"updated_at", user.UpdatedAt},
-		bson.E{"files", convertFilesToUser(user.Files)},
+		bson.E{Key: "user_id", Value: user.UserID},
+		bson.E{Key: "email", Value: user.Email},
+		bson.E{Key: "password", Value: user.Password},
+		bson.E{Key: "token", Value: user.Token},
+		bson.E{Key: "refresh_token", Value: user.RefreshToken},
+		bson.E{Key: "created_at", Value: user.CreatedAt},
+		bson.E{Key: "updated_at", Value: user.UpdatedAt},
+		bson.E{Key: "files", Value: convertFilesToUser(user.Files)},
 	}
 	return mr.userClient.Update(updatedUser, "user_id", user_id)
 }
