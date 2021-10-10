@@ -24,11 +24,11 @@ func TestSet(t *testing.T) {
 
 	err := redisTestClient.Set(ctx, "key", "val", 1*time.Minute)
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 }
 
@@ -42,11 +42,11 @@ func TestGet(t *testing.T) {
 
 	res, err := redisTestClient.Get(ctx, "key")
 	if err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Error(err)
+		assert.Error(t, err)
 	}
 
 	assert.Equal(t, []byte("key"), res)
