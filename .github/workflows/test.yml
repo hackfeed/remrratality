@@ -12,7 +12,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ matrix.go }}
+          go-version: ${{ matrix.go-version }}
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -25,7 +25,7 @@ jobs:
         uses: shogo82148/actions-goveralls@v1.4.7
         with:
           path-to-profile: backend/profile.cov
-          flag-name: Go-${{ matrix.go }}
+          flag-name: Go-${{ matrix.go-version }}
           parallel: true
 
   finish:
