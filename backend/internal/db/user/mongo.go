@@ -107,7 +107,7 @@ func (mc *MongoClient) Update(obj interface{}, key string, value interface{}) er
 		UpdateOne(
 			ctx,
 			bson.M{key: value},
-			bson.D{{"$set", obj}},
+			bson.D{{Key: "$set", Value: obj}},
 			&opt,
 		); err != nil {
 		return fmt.Errorf("failed to run mongo updateOne method, error is: %s", err)

@@ -84,7 +84,7 @@ func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
 	return mappedUser, nil
 }
 
-func (mr *mongoRepo) UpdateUser(user_id string, user domain.User) error {
+func (mr *mongoRepo) UpdateUser(userID string, user domain.User) error {
 	updatedUser := primitive.D{
 		bson.E{Key: "user_id", Value: user.UserID},
 		bson.E{Key: "email", Value: user.Email},
@@ -95,21 +95,21 @@ func (mr *mongoRepo) UpdateUser(user_id string, user domain.User) error {
 		bson.E{Key: "updated_at", Value: user.UpdatedAt},
 		bson.E{Key: "files", Value: convertFilesToUser(user.Files)},
 	}
-	return mr.userClient.Update(updatedUser, "user_id", user_id)
+	return mr.userClient.Update(updatedUser, "user_id", userID)
 }
 
 func convertFilesToDomain(userFiles []user.File) []domain.File {
-	convertedFiles := []domain.File{}
-	for _, file := range userFiles {
-		convertedFiles = append(convertedFiles, domain.File{Name: file.Name, UploadedAt: file.UploadedAt})
+	convertedFiles := make([]domain.File, len(userFiles))
+	for i, file := range userFiles {
+		convertedFiles[i] = domain.File{Name: file.Name, UploadedAt: file.UploadedAt}
 	}
 	return convertedFiles
 }
 
 func convertFilesToUser(domainFiles []domain.File) []user.File {
-	convertedFiles := []user.File{}
-	for _, file := range domainFiles {
-		convertedFiles = append(convertedFiles, user.File{Name: file.Name, UploadedAt: file.UploadedAt})
+	convertedFiles := make([]user.File, len(domainFiles))
+	for i, file := range domainFiles {
+		convertedFiles[i] = user.File{Name: file.Name, UploadedAt: file.UploadedAt}
 	}
 	return convertedFiles
 }
