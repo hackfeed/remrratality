@@ -3,6 +3,7 @@
 [![test](https://github.com/hackfeed/remrratality/actions/workflows/test-backend.yml/badge.svg?branch=master)](https://github.com/hackfeed/remrratality/actions)
 [![lint](https://github.com/hackfeed/remrratality/actions/workflows/lint-backend.yml/badge.svg?branch=master)](https://github.com/hackfeed/remrratality/actions)
 [![Coverage Status](https://coveralls.io/repos/github/hackfeed/remrratality/badge.svg)](https://coveralls.io/github/hackfeed/remrratality)
+[![go report](https://goreportcard.com/badge/github.com/hackfeed/remrratality)](https://goreportcard.com/report/github.com/hackfeed/remrratality)
 
 Перерождение проекта [**mrratality**](https://github.com/hackfeed/mrratality) с улучшенной архитектурой и стеком.
 

@@ -10,12 +10,12 @@ import (
 )
 
 type postgresRepo struct {
-	storageClient storage.PostgresClient
+	StorageClient storage.PostgresClient
 }
 
 func NewPostgresRepo(storageClient storage.PostgresClient) StorageRepository {
 	return &postgresRepo{
-		storageClient: storageClient,
+		StorageClient: storageClient,
 	}
 }
 
@@ -35,7 +35,7 @@ func (pr *postgresRepo) AddInvoices(invoices []domain.Invoice) ([]domain.Invoice
 		mappedInvoices = append(mappedInvoices, mappedInvoice)
 	}
 
-	err := pr.storageClient.Create(context.Background(), "invoices", storage.AllFields, mappedInvoices)
+	err := pr.StorageClient.Create(context.Background(), "invoices", storage.AllFields, mappedInvoices)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert invoices, error is: %s", err)
 	}
@@ -44,7 +44,7 @@ func (pr *postgresRepo) AddInvoices(invoices []domain.Invoice) ([]domain.Invoice
 }
 
 func (pr *postgresRepo) GetInvoicesByPeriod(userID, fileID string, periodStart, periodEnd time.Time) ([]domain.Invoice, error) {
-	invoices, err := pr.storageClient.ReadByPeriod(
+	invoices, err := pr.StorageClient.ReadByPeriod(
 		context.Background(),
 		"invoices",
 		storage.AllFields,
@@ -79,7 +79,7 @@ func (pr *postgresRepo) GetInvoicesByPeriod(userID, fileID string, periodStart, 
 }
 
 func (pr *postgresRepo) DeleteInvoices(userID, fileID string) error {
-	return pr.storageClient.Delete(context.Background(), "invoices", userID, fileID)
+	return pr.StorageClient.Delete(context.Background(), "invoices", userID, fileID)
 }
 
 func mapDate(date string) time.Time {

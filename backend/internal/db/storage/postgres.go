@@ -11,7 +11,7 @@ import (
 )
 
 type PostgresClient struct {
-	client *pgxpool.Pool
+	Client *pgxpool.Pool
 }
 
 type Options struct {
@@ -53,7 +53,7 @@ func NewPostgresClient(ctx context.Context, options *Options) (*PostgresClient, 
 			return nil, fmt.Errorf("failed to initialize postgres client, error is: %s", err)
 		}
 		postgresClient = &PostgresClient{
-			client: client,
+			Client: client,
 		}
 		return postgresClient, nil
 	}
@@ -73,7 +73,7 @@ func getPostgresClient(ctx context.Context, options *Options) (*pgxpool.Pool, er
 }
 
 func (pc *PostgresClient) Create(ctx context.Context, table string, fields []string, invoices []Invoice) error {
-	tx, err := pc.client.Begin(ctx)
+	tx, err := pc.Client.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to begin postgres transaction, error is: %s", err)
 	}
@@ -96,7 +96,7 @@ func (pc *PostgresClient) Create(ctx context.Context, table string, fields []str
 			invoices[i].PeriodEnd,
 		}
 	}
-	if _, err = pc.client.CopyFrom(ctx, pgx.Identifier{table}, fields, pgx.CopyFromRows(data)); err != nil {
+	if _, err = pc.Client.CopyFrom(ctx, pgx.Identifier{table}, fields, pgx.CopyFromRows(data)); err != nil {
 		return fmt.Errorf("failed to copy records to postgres from prepared data, error is: %s", err)
 	}
 
@@ -125,7 +125,7 @@ func (pc *PostgresClient) ReadByPeriod(
 		userID,
 		fileID,
 	)
-	rows, err := pc.client.Query(
+	rows, err := pc.Client.Query(
 		ctx,
 		query,
 	)
@@ -154,7 +154,7 @@ func (pc *PostgresClient) ReadByPeriod(
 }
 
 func (pc *PostgresClient) Delete(ctx context.Context, table, userID, fileID string) error {
-	if _, err := pc.client.Query(
+	if _, err := pc.Client.Query(
 		ctx,
 		fmt.Sprintf(
 			"DELETE FROM %s WHERE user_id = '%s' AND file_id = '%s'",

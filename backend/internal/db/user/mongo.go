@@ -12,7 +12,7 @@ import (
 )
 
 type MongoClient struct {
-	client *mongo.Client
+	Client *mongo.Client
 }
 
 type Options struct {
@@ -49,7 +49,7 @@ func NewMongoClient(ctx context.Context, options *Options) (*MongoClient, error)
 			return nil, fmt.Errorf("failed to initialize mongo client, error is: %s", err)
 		}
 		mongoClient = &MongoClient{
-			client: client,
+			Client: client,
 		}
 		return mongoClient, nil
 	}
@@ -71,7 +71,7 @@ func (mc *MongoClient) Create(user User) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	if _, err := mc.client.Database("mrr").Collection("user").InsertOne(ctx, user); err != nil {
+	if _, err := mc.Client.Database("mrr").Collection("user").InsertOne(ctx, user); err != nil {
 		return User{}, fmt.Errorf("failed to run mongo insertOne method, error is: %s", err)
 	}
 
@@ -84,7 +84,7 @@ func (mc *MongoClient) Read(key string, value interface{}) (User, error) {
 
 	var user User
 
-	if err := mc.client.Database("mrr").Collection("user").FindOne(ctx, bson.M{key: value}).Decode(&user); err != nil {
+	if err := mc.Client.Database("mrr").Collection("user").FindOne(ctx, bson.M{key: value}).Decode(&user); err != nil {
 		return User{}, fmt.Errorf("failed to run mongo decode method, error is: %s", err)
 	}
 
@@ -101,7 +101,7 @@ func (mc *MongoClient) Update(obj interface{}, key string, value interface{}) er
 	}
 
 	if _, err := mc.
-		client.
+		Client.
 		Database("mrr").
 		Collection("user").
 		UpdateOne(

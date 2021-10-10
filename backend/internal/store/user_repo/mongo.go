@@ -11,12 +11,12 @@ import (
 )
 
 type mongoRepo struct {
-	userClient user.MongoClient
+	UserClient user.MongoClient
 }
 
 func NewMongoRepo(userClient user.MongoClient) UserRepository {
 	return &mongoRepo{
-		userClient: userClient,
+		UserClient: userClient,
 	}
 }
 
@@ -46,7 +46,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 	mappedUser.UpdatedAt = updatedAt
 	mappedUser.Files = []user.File{}
 
-	_, err = mr.userClient.Create(mappedUser)
+	_, err = mr.UserClient.Create(mappedUser)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to insert user with email %s, error is: %s", email, err)
 	}
@@ -63,7 +63,7 @@ func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
 }
 
 func (mr *mongoRepo) GetUser(email string) (domain.User, error) {
-	user, err := mr.userClient.Read("email", email)
+	user, err := mr.UserClient.Read("email", email)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get user with email %s, error is: %s", email, err)
 	}
@@ -95,7 +95,7 @@ func (mr *mongoRepo) UpdateUser(userID string, user domain.User) error {
 		bson.E{Key: "updated_at", Value: user.UpdatedAt},
 		bson.E{Key: "files", Value: convertFilesToUser(user.Files)},
 	}
-	return mr.userClient.Update(updatedUser, "user_id", userID)
+	return mr.UserClient.Update(updatedUser, "user_id", userID)
 }
 
 func convertFilesToDomain(userFiles []user.File) []domain.File {
