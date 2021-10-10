@@ -1,5 +1,5 @@
+name: test-backend
 on: [push, pull_request]
-
 jobs:
   test:
     strategy:
