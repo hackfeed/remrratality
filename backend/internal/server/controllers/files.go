@@ -306,9 +306,9 @@ func updateFiles(userRepo userrepo.UserRepository, email, userID, filename strin
 }
 
 func uploadFileContent(storageRepo storagerepo.StorageRepository, userID, fileID string, invoices []*Invoice) error {
-	mappedInvoices := make([]domain.Invoice, 0)
+	mappedInvoices := make([]domain.Invoice, len(invoices))
 
-	for _, invoice := range invoices {
+	for i, invoice := range invoices {
 		mappedInvoice := domain.Invoice{
 			UserID:      userID,
 			FileID:      fileID,
@@ -318,7 +318,7 @@ func uploadFileContent(storageRepo storagerepo.StorageRepository, userID, fileID
 			PaidAmount:  invoice.PaidAmount,
 			PeriodEnd:   invoice.PeriodEnd,
 		}
-		mappedInvoices = append(mappedInvoices, mappedInvoice)
+		mappedInvoices[i] = mappedInvoice
 	}
 
 	if _, err := storageRepo.AddInvoices(mappedInvoices); err != nil {
