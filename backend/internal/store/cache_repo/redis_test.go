@@ -31,61 +31,101 @@ func TestGetMRR(t *testing.T) {
 
 	repo := NewRedisRepo(redisTestClient, testTTL)
 
-	tests := []struct {
-		input string
-		want  domain.TotalMRR
-	}{
-		{input: "notExistingKey", want: domain.TotalMRR{}},
-		{input: "existingKeyWithRedisErr", want: domain.TotalMRR{}},
-		{input: "existingKeyWithMarshalErr", want: domain.TotalMRR{}},
-		{input: "existingKey", want: domain.TotalMRR{
-			New:          []float32{0},
-			Old:          []float32{0},
-			Reactivation: []float32{0},
-			Expansion:    []float32{0},
-			Contraction:  []float32{0},
-			Churn:        []float32{0},
-			Total:        []float32{0},
-		}},
+	type testInput struct {
+		key string
+	}
+	type testWant struct {
+		mrr domain.TotalMRR
+		err error
 	}
 
-	for i := range tests {
-		if tests[i].input == "notExistingKey" {
-			mock.ExpectGet(tests[i].input).RedisNil()
-			mrr, err := repo.GetMRR(tests[i].input)
-			assert.Equal(t, tests[i].want, mrr)
-			assert.NoError(t, err)
+	tests := []struct {
+		input testInput
+		want  testWant
+	}{
+		{
+			input: testInput{
+				key: "notExistingKey",
+			},
+			want: testWant{
+				mrr: domain.TotalMRR{},
+				err: nil,
+			},
+		},
+		{
+			input: testInput{
+				key: "existingKeyWithRedisErr",
+			},
+			want: testWant{
+				mrr: domain.TotalMRR{},
+				err: errors.New("failed to get mrr from cache by key existingKeyWithRedisErr, error is: redis err"),
+			},
+		},
+		{
+			input: testInput{
+				key: "existingKeyWithMarshalErr",
+			},
+			want: testWant{
+				mrr: domain.TotalMRR{},
+				err: errors.New("failed to unmarshal by key existingKeyWithMarshalErr, error is: invalid character 'b' looking for beginning of value"),
+			},
+		},
+		{
+			input: testInput{
+				key: "existingKey",
+			},
+			want: testWant{
+				mrr: domain.TotalMRR{
+					New:          []float32{0},
+					Old:          []float32{0},
+					Reactivation: []float32{0},
+					Expansion:    []float32{0},
+					Contraction:  []float32{0},
+					Churn:        []float32{0},
+					Total:        []float32{0},
+				},
+				err: nil,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		if test.input.key == "notExistingKey" {
+			mock.ExpectGet(test.input.key).RedisNil()
+			mrr, err := repo.GetMRR(test.input.key)
+			assert.Equal(t, test.want.mrr, mrr)
+			assert.Equal(t, test.want.err, err)
 			if err = mock.ExpectationsWereMet(); err != nil {
 				assert.Error(t, err)
 			}
 			mock.ClearExpect()
 		}
-		if tests[i].input == "existingKeyWithRedisErr" {
+		if test.input.key == "existingKeyWithRedisErr" {
 			redisErr := errors.New("redis err")
-			mock.ExpectGet(tests[i].input).SetErr(redisErr)
-			mrr, err := repo.GetMRR(tests[i].input)
-			assert.Equal(t, tests[i].want, mrr)
-			assert.Errorf(t, err, "failed to get mrr from cache by key %s, error is: %s", tests[i].input, err)
+			mock.ExpectGet(test.input.key).SetErr(redisErr)
+			mrr, err := repo.GetMRR(test.input.key)
+			assert.Equal(t, test.want.mrr, mrr)
+			assert.Equal(t, test.want.err, err)
 			if err = mock.ExpectationsWereMet(); err != nil {
 				assert.Error(t, err)
 			}
 			mock.ClearExpect()
 		}
-		if tests[i].input == "existingKeyWithMarshalErr" {
-			mock.ExpectGet(tests[i].input).SetVal("brokenJSON")
-			mrr, err := repo.GetMRR(tests[i].input)
-			assert.Equal(t, tests[i].want, mrr)
-			assert.Errorf(t, err, "failed to unmarshal by key %s, error is: %s", tests[i].input, err)
+		if test.input.key == "existingKeyWithMarshalErr" {
+			mock.ExpectGet(test.input.key).SetVal("brokenJSON")
+			mrr, err := repo.GetMRR(test.input.key)
+			assert.Equal(t, test.want.mrr, mrr)
+			assert.Equal(t, test.want.err, err)
 			if err = mock.ExpectationsWereMet(); err != nil {
 				assert.Error(t, err)
 			}
 			mock.ClearExpect()
 		}
-		if tests[i].input == "existingKey" {
-			mock.ExpectGet(tests[i].input).SetVal("{\"New\":[0],\"Old\":[0],\"Reactivation\":[0],\"Expansion\":[0],\"Contraction\":[0],\"Churn\":[0],\"Total\":[0]}")
-			mrr, err := repo.GetMRR(tests[i].input)
-			assert.Equal(t, tests[i].want, mrr)
-			assert.NoError(t, err)
+		if test.input.key == "existingKey" {
+			mock.ExpectGet(test.input.key).SetVal("{\"New\":[0],\"Old\":[0],\"Reactivation\":[0],\"Expansion\":[0],\"Contraction\":[0],\"Churn\":[0],\"Total\":[0]}")
+			mrr, err := repo.GetMRR(test.input.key)
+			assert.Equal(t, test.want.mrr, mrr)
+			assert.Equal(t, test.want.err, err)
 			if err = mock.ExpectationsWereMet(); err != nil {
 				assert.Error(t, err)
 			}
@@ -102,53 +142,76 @@ func TestSetMRR(t *testing.T) {
 
 	repo := NewRedisRepo(redisTestClient, testTTL)
 
+	type testInput struct {
+		key string
+		mrr domain.TotalMRR
+	}
+	type testWant struct {
+		mrr domain.TotalMRR
+		err error
+	}
+
 	tests := []struct {
-		inputKey   string
-		inputValue domain.TotalMRR
-		want       domain.TotalMRR
+		input testInput
+		want  testWant
 	}{
-		{inputKey: "keyWithRedisErr", inputValue: domain.TotalMRR{}, want: domain.TotalMRR{}},
 		{
-			inputKey: "key",
-			inputValue: domain.TotalMRR{
-				New:          []float32{0},
-				Old:          []float32{0},
-				Reactivation: []float32{0},
-				Expansion:    []float32{0},
-				Contraction:  []float32{0},
-				Churn:        []float32{0},
-				Total:        []float32{0},
+			input: testInput{
+				key: "keyWithRedisErr",
+				mrr: domain.TotalMRR{},
 			},
-			want: domain.TotalMRR{
-				New:          []float32{0},
-				Old:          []float32{0},
-				Reactivation: []float32{0},
-				Expansion:    []float32{0},
-				Contraction:  []float32{0},
-				Churn:        []float32{0},
-				Total:        []float32{0},
+			want: testWant{
+				mrr: domain.TotalMRR{},
+				err: errors.New("failed to set mrr to cache by key keyWithRedisErr, error is: redis err"),
+			},
+		},
+		{
+			input: testInput{
+				key: "key",
+				mrr: domain.TotalMRR{
+					New:          []float32{0},
+					Old:          []float32{0},
+					Reactivation: []float32{0},
+					Expansion:    []float32{0},
+					Contraction:  []float32{0},
+					Churn:        []float32{0},
+					Total:        []float32{0},
+				},
+			},
+			want: testWant{
+				mrr: domain.TotalMRR{
+					New:          []float32{0},
+					Old:          []float32{0},
+					Reactivation: []float32{0},
+					Expansion:    []float32{0},
+					Contraction:  []float32{0},
+					Churn:        []float32{0},
+					Total:        []float32{0},
+				},
+				err: nil,
 			},
 		},
 	}
 
-	for i := range tests {
-		if tests[i].inputKey == "keyWithRedisErr" {
+	for _, test := range tests {
+		if test.input.key == "keyWithRedisErr" {
 			redisErr := errors.New("redis err")
-			mock.ExpectSet(tests[i].inputKey, tests[i].inputValue, testTTL).SetErr(redisErr)
-			mrr, err := repo.SetMRR(tests[i].inputKey, tests[i].inputValue)
-			assert.Equal(t, tests[i].want, mrr)
-			assert.Errorf(t, err, "failed to set mrr to cache by key %s, error is: %s", tests[i].inputKey, err)
+			bytes, _ := json.Marshal(test.input.mrr)
+			mock.ExpectSet(test.input.key, bytes, testTTL).SetErr(redisErr)
+			mrr, err := repo.SetMRR(test.input.key, test.input.mrr)
+			assert.Equal(t, test.want.mrr, mrr)
+			assert.Equal(t, test.want.err, err)
 			if err = mock.ExpectationsWereMet(); err != nil {
 				assert.Error(t, err)
 			}
 			mock.ClearExpect()
 		}
-		if tests[i].inputKey == "key" {
-			bytes, _ := json.Marshal(tests[i].inputValue)
-			mock.ExpectSet(tests[i].inputKey, bytes, testTTL).SetVal("")
-			mrr, err := repo.SetMRR(tests[i].inputKey, tests[i].inputValue)
-			assert.Equal(t, tests[i].want, mrr)
-			assert.NoError(t, err)
+		if test.input.key == "key" {
+			bytes, _ := json.Marshal(test.input.mrr)
+			mock.ExpectSet(test.input.key, bytes, testTTL).SetVal("")
+			mrr, err := repo.SetMRR(test.input.key, test.input.mrr)
+			assert.Equal(t, test.want.mrr, mrr)
+			assert.Equal(t, test.want.err, err)
 			if err = mock.ExpectationsWereMet(); err != nil {
 				assert.Error(t, err)
 			}

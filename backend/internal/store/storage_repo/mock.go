@@ -16,8 +16,24 @@ func (prm *StorageRepositoryMock) AddInvoices(invoices []domain.Invoice) ([]doma
 	return invoices, nil
 }
 
-func (prm *StorageRepositoryMock) GetInvoicesByPeriod(_, _ string, _, _ time.Time) ([]domain.Invoice, error) {
-	return make([]domain.Invoice, 0), nil
+func (prm *StorageRepositoryMock) GetInvoicesByPeriod(userID, _ string, _, _ time.Time) ([]domain.Invoice, error) {
+	if userID == "errorGetInvoicesByPeriod" {
+		return nil, errors.New("error while getting invoices by period")
+	}
+	if userID == "emptyGetInvoicesByPeriod" {
+		return make([]domain.Invoice, 0), nil
+	}
+	return []domain.Invoice{
+		{
+			UserID:      "",
+			FileID:      "",
+			CustomerID:  0,
+			PeriodStart: "2021-10-01",
+			PaidPlan:    "monthly",
+			PaidAmount:  100.0,
+			PeriodEnd:   "2021-10-31",
+		},
+	}, nil
 }
 
 func (prm *StorageRepositoryMock) DeleteInvoices(userID, _ string) error {
