@@ -77,12 +77,8 @@ func (pc *PostgresClient) Create(ctx context.Context, table string, fields []str
 	if err != nil {
 		return fmt.Errorf("failed to begin postgres transaction, error is: %s", err)
 	}
-	defer func(tx pgx.Tx, ctx context.Context) {
-		err := tx.Rollback(ctx)
-		if err != nil {
-			panic(fmt.Errorf("failed to rollback postgres transaction, error is: %s", err))
-		}
-	}(tx, ctx)
+	// nolint
+	defer tx.Rollback(ctx)
 
 	data := make([][]interface{}, len(invoices))
 	for i := range data {
