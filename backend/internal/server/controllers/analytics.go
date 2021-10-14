@@ -70,7 +70,7 @@ func CreateAnalytics(c *gin.Context) {
 	months, mrr, err := createAnalytics(storageRepo, cacheRepo, userID, req.Filename, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
 		log.Errorf("failed to get MRR analytics, error is: %s", err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "Failed to get analytics. Please ensure that period start is earlier than period end and data exists in given period",
 		})
 		return
