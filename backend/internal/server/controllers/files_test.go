@@ -4,9 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
-
 	"github.com/hackfeed/remrratality/backend/internal/domain"
+	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
 	"github.com/stretchr/testify/assert"
 )

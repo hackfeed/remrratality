@@ -1,15 +1,121 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/hackfeed/remrratality/backend/internal/domain"
+	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	cacherepo "github.com/hackfeed/remrratality/backend/internal/store/cache_repo"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestCreateAnalyticsHandler(t *testing.T) {
+	type testInput struct {
+		keys map[string]interface{}
+		body interface{}
+	}
+	type testWant struct {
+		code    int
+		message string
+	}
+
+	tests := []struct {
+		input testInput
+		want  testWant
+	}{
+		{
+			input: testInput{keys: map[string]interface{}{
+				"user_id": 5,
+			}},
+			want: testWant{
+				code:    500,
+				message: "{\"message\":\"Unable to determine logged in user\"}",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"user_id":      "flex",
+				"storage_repo": "invalidType",
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "{\"message\":\"Failed to get storage_repo\"}",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"user_id":      "flex",
+				"storage_repo": &storagerepo.StorageRepositoryMock{},
+				"cache_repo":   "invalidType",
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "{\"message\":\"Failed to get cache_repo\"}",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"user_id":      "flex",
+				"storage_repo": &storagerepo.StorageRepositoryMock{},
+				"cache_repo":   &cacherepo.CacheRepositoryMock{},
+			}},
+			want: testWant{
+				code:    http.StatusBadRequest,
+				message: "{\"message\":\"Failed to parse request body\"}",
+			},
+		},
+		{
+			input: testInput{
+				keys: map[string]interface{}{
+					"user_id":      "flex",
+					"storage_repo": &storagerepo.StorageRepositoryMock{},
+					"cache_repo":   &cacherepo.CacheRepositoryMock{},
+				},
+				body: models.Period{
+					Filename:    "flex",
+					PeriodStart: "wrongData",
+					PeriodEnd:   "someEndPeriod",
+				}},
+			want: testWant{
+				code:    http.StatusBadRequest,
+				message: "{\"message\":\"Failed to get analytics. Please ensure that period start is earlier than period end and data exists in given period\"}",
+			},
+		},
+		{
+			input: testInput{
+				keys: map[string]interface{}{
+					"user_id":      "flex",
+					"storage_repo": &storagerepo.StorageRepositoryMock{},
+					"cache_repo":   &cacherepo.CacheRepositoryMock{},
+				},
+				body: models.Period{
+					Filename:    "flex",
+					PeriodStart: "2017-01-01",
+					PeriodEnd:   "2017-02-01",
+				}},
+			want: testWant{
+				code:    http.StatusOK,
+				message: "{\"message\":\"Analytics is loaded\",\"months\":[\"1.2017\",\"2.2017\"],\"mrr\":{\"New\":[0,0],\"Old\":[0,0],\"Reactivation\":[0,0],\"Expansion\":[0,0],\"Contraction\":[0,0],\"Churn\":[0,0],\"Total\":[0,0]}}",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		c, w := createGinContext(test.input.keys, test.input.body)
+		CreateAnalytics(c)
+		assert.Equal(t, test.want.code, w.Code)
+		assert.Equal(t, test.want.message, w.Body.String())
+	}
+}
 
 func TestCreateAnalytics(t *testing.T) {
 	type testInput struct {
@@ -578,4 +684,20 @@ func TestGetMonthsDiff(t *testing.T) {
 func timeInLocation(tm time.Time, loc string) time.Time {
 	loadedLoc, _ := time.LoadLocation(loc)
 	return tm.In(loadedLoc)
+}
+
+func createGinContext(keys map[string]interface{}, body interface{}) (*gin.Context, *httptest.ResponseRecorder) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	jsonBytes, _ := json.Marshal(body)
+	req := &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBytes)),
+	}
+
+	for k, v := range keys {
+		c.Set(k, v)
+	}
+	c.Request = req
+
+	return c, w
 }

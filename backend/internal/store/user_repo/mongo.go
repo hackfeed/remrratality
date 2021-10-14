@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hackfeed/remrratality/backend/internal/utils/user_validation"
+
 	"github.com/hackfeed/remrratality/backend/internal/db/user"
 	"github.com/hackfeed/remrratality/backend/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,43 +23,46 @@ func NewMongoRepo(userClient user.MongoClient) UserRepository {
 }
 
 func (mr *mongoRepo) AddUser(email, password string) (domain.User, error) {
-	internalUser := domain.User{
-		Email:    &email,
-		Password: &password,
-	}
-
-	hashedPassword, err := internalUser.HashPassword()
+	hashedPassword, err := user_validation.HashPassword(password)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to hash password for email %s, error is: %s", email, err)
 	}
+
 	createdAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	updatedAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
-	mappedUser := user.User{}
-	mappedUser.ID = primitive.NewObjectID()
-	mappedUser.UserID = mappedUser.ID.Hex()
-	internalUser.UserID = mappedUser.UserID
-	mappedUser.Email = &email
-	mappedUser.Password = &hashedPassword
-	token, refreshToken, _ := internalUser.GenerateTokens()
-	mappedUser.Token = &token
-	mappedUser.RefreshToken = &refreshToken
-	mappedUser.CreatedAt = createdAt
-	mappedUser.UpdatedAt = updatedAt
-	mappedUser.Files = []user.File{}
+	id := primitive.NewObjectID()
+	mappedUser := user.User{
+		ID:        id,
+		UserID:    id.Hex(),
+		Email:     email,
+		Password:  hashedPassword,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		Files:     make([]user.File, 0),
+	}
+	token, refreshToken, err := user_validation.GenerateTokens(email, mappedUser.UserID)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to generate tokens for email %s, error is: %s", email, err)
+	}
+	mappedUser.Token = token
+	mappedUser.RefreshToken = refreshToken
 
 	_, err = mr.UserClient.Create(mappedUser)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to insert user with email %s, error is: %s", email, err)
 	}
 
-	internalUser.Password = mappedUser.Password
-	internalUser.Token = mappedUser.Token
-	internalUser.RefreshToken = mappedUser.RefreshToken
-	internalUser.CreatedAt = mappedUser.CreatedAt
-	internalUser.UpdatedAt = mappedUser.UpdatedAt
-	internalFiles := convertFilesToDomain(mappedUser.Files)
-	internalUser.Files = internalFiles
+	internalUser := domain.User{
+		UserID:       mappedUser.UserID,
+		Email:        mappedUser.Email,
+		Password:     mappedUser.Password,
+		Token:        mappedUser.Token,
+		RefreshToken: mappedUser.RefreshToken,
+		CreatedAt:    mappedUser.CreatedAt,
+		UpdatedAt:    mappedUser.UpdatedAt,
+		Files:        convertFilesToDomain(mappedUser.Files),
+	}
 
 	return internalUser, nil
 }

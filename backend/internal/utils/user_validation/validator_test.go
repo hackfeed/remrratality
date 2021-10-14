@@ -1,4 +1,4 @@
-package domain
+package user_validation
 
 import (
 	"errors"
@@ -6,40 +6,39 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hackfeed/remrratality/backend/internal/domain"
+
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	user      User
+	user      domain.User
 	realToken string
 )
 
 func TestMain(m *testing.M) {
-	email := "test@test.com"
-	password := "pass"
-
-	user = User{
+	user = domain.User{
 		UserID:    "1",
-		Email:     &email,
-		Password:  &password,
+		Email:     "test@test.com",
+		Password:  "pass",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Files:     make([]File, 0),
+		Files:     make([]domain.File, 0),
 	}
 
-	hashedPassword, _ := user.HashPassword()
-	user.Password = &hashedPassword
+	hashedPassword, _ := HashPassword(user.Password)
+	user.Password = hashedPassword
 
-	token, refreshToken, _ := user.GenerateTokens()
+	token, refreshToken, _ := GenerateTokens(user.Email, user.UserID)
 	realToken = token
-	user.Token = &realToken
-	user.RefreshToken = &refreshToken
+	user.Token = realToken
+	user.RefreshToken = refreshToken
 
 	os.Exit(m.Run())
 }
 
 func TestGenerateTokens(t *testing.T) {
-	token, refreshToken, err := user.GenerateTokens()
+	token, refreshToken, err := GenerateTokens(user.Email, user.Password)
 	assert.NoError(t, err)
 	assert.NotNil(t, token)
 	assert.NotNil(t, refreshToken)
@@ -65,7 +64,7 @@ func TestUpdateTokens(t *testing.T) {
 		oldToken := user.Token
 		oldRefreshToken := user.RefreshToken
 		oldUpdatedAt := user.UpdatedAt
-		user.UpdateTokens(test.input.token, test.input.refreshToken)
+		UpdateTokens(&user, test.input.token, test.input.refreshToken)
 		assert.NotEqual(t, oldToken, user.Token)
 		assert.NotEqual(t, oldRefreshToken, user.RefreshToken)
 		assert.NotEqual(t, oldUpdatedAt, user.UpdatedAt)
@@ -103,8 +102,7 @@ func TestGetExpirationTime(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		user.Token = &test.input.token
-		_, err := user.GetExpirationTime()
+		_, err := GetExpirationTime(test.input.token)
 		assert.Equal(t, test.want.err, err)
 	}
 }
@@ -132,8 +130,7 @@ func TestHashPassword(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		user.Password = &test.input.password
-		_, err := user.HashPassword()
+		_, err := HashPassword(test.input.password)
 		assert.Equal(t, test.want.err, err)
 	}
 }
@@ -155,13 +152,13 @@ func TestVerifyPassword(t *testing.T) {
 				password: "notUserPass",
 			},
 			want: testWant{
-				err: errors.New("crypto/bcrypt: hashedSecret too short to be a bcrypted password"),
+				err: errors.New("crypto/bcrypt: hashedPassword is not the hash of the given password"),
 			},
 		},
 	}
 
 	for _, test := range tests {
-		err := user.VerifyPassword(test.input.password)
+		err := VerifyPassword(user.Password, test.input.password)
 		assert.Equal(t, test.want.err, err)
 	}
 }

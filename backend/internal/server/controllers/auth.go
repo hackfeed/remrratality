@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/hackfeed/remrratality/backend/internal/utils/user_validation"
+
 	"github.com/gin-gonic/gin"
 	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
@@ -40,25 +42,25 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	existingUser, _ := userRepo.GetUser(*req.Email)
-	if existingUser.Email != nil {
-		log.Infof("user with email %s already exists", *existingUser.Email)
+	existingUser, _ := userRepo.GetUser(req.Email)
+	if existingUser.Email != "" {
+		log.Infof("user with email %s already exists", existingUser.Email)
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.Response{
 			Message: "This email is already taken",
 		})
 		return
 	}
 
-	user, err := userRepo.AddUser(*req.Email, *req.Password)
+	user, err := userRepo.AddUser(req.Email, req.Password)
 	if err != nil {
-		log.Errorf("failed to add user with email %s, error is: %s", *req.Email, err)
+		log.Errorf("failed to add user with email %s, error is: %s", req.Email, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Failed to create new user. Please, try again later",
 		})
 		return
 	}
 
-	expiresAt, err := user.GetExpirationTime()
+	expiresAt, err := user_validation.GetExpirationTime(user.Token)
 	if err != nil {
 		log.Errorf("failed to get token expiration time for user %s, error is: %s", user.UserID, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
@@ -69,7 +71,7 @@ func SignUp(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.ResponseSuccessAuth{
 		Message:   "User created",
-		IDToken:   *user.Token,
+		IDToken:   user.Token,
 		LocalID:   user.UserID,
 		ExpiresAt: expiresAt,
 	})
@@ -106,16 +108,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user, err := userRepo.GetUser(*req.Email)
+	user, err := userRepo.GetUser(req.Email)
 	if err != nil {
-		log.Errorf("failed to get user with email %s, error is: %s", *req.Email, err)
+		log.Errorf("failed to get user with email %s, error is: %s", req.Email, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "User with given email doesn't exist",
 		})
 		return
 	}
 
-	if err = user.VerifyPassword(*req.Password); err != nil {
+	if err = user_validation.VerifyPassword(user.Password, req.Password); err != nil {
 		log.Errorf("failed to verify password for user %s, error is: %s", user.UserID, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
 			Message: "Password is incorrect",
@@ -123,7 +125,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, refreshToken, err := user.GenerateTokens()
+	token, refreshToken, err := user_validation.GenerateTokens(user.Email, user.UserID)
 	if err != nil {
 		log.Errorf("failed to generate tokens for user %s, error is: %s", user.UserID, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
@@ -132,8 +134,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user.Token = &token
-	user.RefreshToken = &refreshToken
+	user_validation.UpdateTokens(&user, token, refreshToken)
 
 	if err = userRepo.UpdateUser(user.UserID, user); err != nil {
 		log.Errorf("failed to update user %s, error is: %s", user.UserID, err)
@@ -143,7 +144,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	expiresAt, err := user.GetExpirationTime()
+	expiresAt, err := user_validation.GetExpirationTime(user.Token)
 	if err != nil {
 		log.Errorf("failed to get token expiration time for user %s, error is: %s", user.UserID, err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.Response{
@@ -154,7 +155,7 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.ResponseSuccessAuth{
 		Message:   "Login success",
-		IDToken:   *user.Token,
+		IDToken:   user.Token,
 		LocalID:   user.UserID,
 		ExpiresAt: expiresAt,
 	})
