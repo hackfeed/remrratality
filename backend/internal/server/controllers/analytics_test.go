@@ -1,20 +1,16 @@
 package controllers
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/hackfeed/remrratality/backend/internal/domain"
 	"github.com/hackfeed/remrratality/backend/internal/server/models"
 	cacherepo "github.com/hackfeed/remrratality/backend/internal/store/cache_repo"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
+	internalTesting "github.com/hackfeed/remrratality/backend/internal/utils/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,7 +33,7 @@ func TestCreateAnalyticsHandler(t *testing.T) {
 				"user_id": 5,
 			}},
 			want: testWant{
-				code:    500,
+				code:    http.StatusInternalServerError,
 				message: "{\"message\":\"Unable to determine logged in user\"}",
 			},
 		},
@@ -110,7 +106,7 @@ func TestCreateAnalyticsHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, w := createGinContext(test.input.keys, test.input.body)
+		c, w := internalTesting.CreateGinContext(test.input.keys, test.input.body, nil)
 		CreateAnalytics(c)
 		assert.Equal(t, test.want.code, w.Code)
 		assert.Equal(t, test.want.message, w.Body.String())
@@ -684,20 +680,4 @@ func TestGetMonthsDiff(t *testing.T) {
 func timeInLocation(tm time.Time, loc string) time.Time {
 	loadedLoc, _ := time.LoadLocation(loc)
 	return tm.In(loadedLoc)
-}
-
-func createGinContext(keys map[string]interface{}, body interface{}) (*gin.Context, *httptest.ResponseRecorder) {
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	jsonBytes, _ := json.Marshal(body)
-	req := &http.Request{
-		Body: io.NopCloser(bytes.NewBuffer(jsonBytes)),
-	}
-
-	for k, v := range keys {
-		c.Set(k, v)
-	}
-	c.Request = req
-
-	return c, w
 }

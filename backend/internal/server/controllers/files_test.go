@@ -2,13 +2,167 @@ package controllers
 
 import (
 	"errors"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hackfeed/remrratality/backend/internal/domain"
 	storagerepo "github.com/hackfeed/remrratality/backend/internal/store/storage_repo"
 	userrepo "github.com/hackfeed/remrratality/backend/internal/store/user_repo"
+	internalTesting "github.com/hackfeed/remrratality/backend/internal/utils/testing"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestLoadFilesHandler(t *testing.T) {
+	type testInput struct {
+		keys map[string]interface{}
+	}
+	type testWant struct {
+		code    int
+		message string
+	}
+
+	tests := []struct {
+		input testInput
+		want  testWant
+	}{
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email": 1,
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Unable to determine logged in user",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":     "test@test.com",
+				"user_repo": "invalidRepo",
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Failed to get user_repo",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":     "errorGetUser",
+				"user_repo": &userrepo.UserRepositoryMock{},
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Failed to fetch user files",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":     "test@test.com",
+				"user_repo": &userrepo.UserRepositoryMock{},
+			}},
+			want: testWant{
+				code:    http.StatusOK,
+				message: "Files are loaded",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		c, w := internalTesting.CreateGinContext(test.input.keys, nil, nil)
+		LoadFiles(c)
+		assert.Equal(t, test.want.code, w.Code)
+		assert.Equal(t, true, strings.Contains(w.Body.String(), test.want.message))
+	}
+}
+
+func TestDeleteFileContentHandler(t *testing.T) {
+	type testInput struct {
+		keys map[string]interface{}
+	}
+	type testWant struct {
+		code    int
+		message string
+	}
+
+	tests := []struct {
+		input testInput
+		want  testWant
+	}{
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email": 1,
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Unable to determine logged in user",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":   "test@test.com",
+				"user_id": 1,
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Unable to determine logged in user",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":     "test@test.com",
+				"user_id":   "id",
+				"user_repo": "invalidRepo",
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Failed to get user_repo",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":        "test@test.com",
+				"user_id":      "id",
+				"user_repo":    &userrepo.UserRepositoryMock{},
+				"storage_repo": "invalidRepo",
+			}},
+			want: testWant{
+				code:    http.StatusInternalServerError,
+				message: "Failed to get storage_repo",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":        "errorGetUser",
+				"user_id":      "id",
+				"user_repo":    &userrepo.UserRepositoryMock{},
+				"storage_repo": &storagerepo.StorageRepositoryMock{},
+			}},
+			want: testWant{
+				code:    http.StatusBadRequest,
+				message: "Failed to delete file",
+			},
+		},
+		{
+			input: testInput{keys: map[string]interface{}{
+				"email":        "user",
+				"user_id":      "user",
+				"user_repo":    &userrepo.UserRepositoryMock{},
+				"storage_repo": &storagerepo.StorageRepositoryMock{},
+			}},
+			want: testWant{
+				code:    http.StatusOK,
+				message: "File deleted",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		c, w := internalTesting.CreateGinContext(test.input.keys, nil, nil)
+		DeleteFileContent(c)
+		assert.Equal(t, test.want.code, w.Code)
+		assert.Equal(t, true, strings.Contains(w.Body.String(), test.want.message))
+	}
+}
 
 func TestLoadFiles(t *testing.T) {
 	type testInput struct {
